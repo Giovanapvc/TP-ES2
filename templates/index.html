@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Sistema Musical</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Bem-vindo ao Sistema</h1>
+    <p>Escolha como deseja entrar:</p>
+    <form action="/artist" method="get" style="display:inline;">
+        <button type="submit" class="button">Sou Artista</button>
+    </form>
+    <form action="/user" method="get" style="display:inline;">
+        <button type="submit" class="button">Sou Usuário</button>
+    </form>
+</body>
+</html>

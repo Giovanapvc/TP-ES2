@@ -28,3 +28,4 @@ class Artist:
     id: str = field(default_factory=_new_id)
     songs: List[Song] = field(default_factory=list)
     likes: int = 0
+    opinions: List[str] = field(default_factory=list)

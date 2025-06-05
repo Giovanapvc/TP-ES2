@@ -1,0 +1,53 @@
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Buscar por Gênero</title>
+    <script>
+        function validate_form() {
+            const checkboxes = document.querySelectorAll('input[name="genre"]:checked');
+            if (checkboxes.length === 0) {
+                alert("Por favor, selecione pelo menos uma opção");
+                return false;
+            }
+            return true;
+        }
+    </script>
+</head>
+
+<body>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul class="flashes">
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
+    <h1>Buscar por Gênero</h1>
+    <form action="{{ url_for('search_by_genre') }}" method="post" onsubmit="return validate_form();">
+        <input type="hidden" name="user" value="{{ user }}">
+        <p>Escolha uma ou mais opções:</p>
+
+        {% set all_genres = [
+            'rock', 'pop', 'jazz', 'hip-hop', 'blues',
+            'metal', 'electronic', 'classical', 'folk', 'other'
+        ] %}
+
+        {% for genre in all_genres %}
+            <label>
+                <input type="checkbox" name="genre" value="{{ genre }}">
+                {{ genre.capitalize() }}
+            </label><br>
+        {% endfor %}
+
+        <br>
+        <button type="submit">Buscar</button>
+    </form>
+
+    <a href="{{ url_for('user_dashboard', name=user) }}">Voltar ao painel</a>
+
+</body>

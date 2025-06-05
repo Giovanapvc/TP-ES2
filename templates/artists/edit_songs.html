@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Editar Música</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul class="flashes">
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
+    <h1>Editar Música de {{ artist }}</h1>
+    <form method="post">
+        <label for="title">Título:</label><br>
+        <input type="text" name="title" value="{{ song[2] }}"><br><br>
+
+        <label for="genre">Gênero:</label><br>
+        <input type="text" name="genre" value="{{ song[4] }}"><br><br>
+
+        <label for="description">Descrição:</label><br>
+        <textarea name="description">{{ song[3] }}</textarea><br><br>
+
+        <button type="submit">Salvar Alterações</button>
+    </form>
+    <a href="{{ url_for('list_songs', name=artist) }}">Cancelar</a>
+</body>
+</html>

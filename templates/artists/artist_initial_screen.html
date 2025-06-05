@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Artistas</title>
+</head>
+<body>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul class="flashes">
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
+    <h1>Página do Artista</h1>
+    <p>Selecione uma opção:</p>
+    <form action="/artist/login" method="get" style="display: inline;">
+        <button type="submit" class="button">Fazer login</button>
+    </form>
+    <form action="/artist/new" method="get" style="display: inline;">
+        <button type="submit" class="button">Criar conta</button>
+    </form>
+    <br>
+    <a href="/">Voltar</a>
+</body>
+</html>

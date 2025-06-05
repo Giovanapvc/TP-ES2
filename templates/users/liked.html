@@ -1,0 +1,67 @@
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Minhas Curtidas</title>
+</head>
+
+<body>
+    
+    <h1>Minhas Curtidas</h1>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul class="flashes">
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
+    <section>
+        <h2>Músicas</h2>
+        {% if songs %}
+            <ul>
+                {% for song in songs %}
+                    <li>
+                        <strong>{{ song[1] }}</strong> - por {{ song[2] }}
+                        <form action="{{ url_for('give_like') }}" method="POST" style="display:inline;">
+                            <input type="hidden" name="user" value="{{ user }}">
+                            <input type="hidden" name="type" value="song">
+                            <input type="hidden" name="target_id" value="{{ song[0] }}">
+                            <input type="hidden" name="value" value="0">
+                            <button type="submit">Descurtir</button>
+                        </form>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>Você ainda não curtiu nenhuma música</p>
+        {% endif %}
+    </section>
+
+    <section>
+        <h2>Artistas</h2>
+        {% if artists %}
+            <ul>
+                {% for artist in artists %}
+                    <li>
+                        <strong>{{ artist[1] }}</strong>
+                        <form action="{{ url_for('give_like') }}" method="post" style="display: inline;">
+                            <input type="hidden" name="user" value="{{ user }}">
+                            <input type="hidden" name="type" value="artist">
+                            <input type="hidden" name="target_id" value="{{ artist[0] }}">
+                            <input type="hidden" name="value" value="0">
+                            <button type="submit">Descurtir</button>
+                        </form>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>Você ainda não curtiu nenhum artista</p>
+        {% endif %}
+    </section>
+
+    <a href="{{ url_for('user_dashboard', name=user) }}">Voltar para o painel</a>
+</body>

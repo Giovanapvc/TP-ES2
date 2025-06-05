@@ -1,0 +1,43 @@
+<head>
+    <meta charset="UTF-8">
+    <title>Estatísticas</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul class="flashes">
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
+    <h1>Estatísticas de {{ artist }}</h1>
+
+    <h2>Likes por Música</h2>
+    <ul>
+        {% for song in songs %}
+            <li>
+                <strong>{{ song['title'] }}</strong>: {{ song['like_count'] }} curtida{{ 's' if song['like_count'] != 1 else '' }}
+            </li>
+        {% else %}
+            <li>Você ainda não tem músicas cadastradas.</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Opiniões por Música</h2>
+    <ul>
+        {% for song in songs %}
+            <li>
+                <strong>{{ song['title'] }}</strong>: {{ song['opinion_count'] }} opinião{{ 's' if song['opinion_count'] != 1 else '' }}
+            </li>
+        {% endfor %}
+    </ul>
+
+    <a href="{{ url_for('artist_dashboard', name=artist) }}">Voltar ao painel</a>
+
+</body>

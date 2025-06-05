@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Minhas Músicas</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul class="flashes">
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
+    <h1>Músicas de {{ artist }}</h1>
+    <ul>
+        {% for song in songs %}
+            <li>
+                <strong>{{ song[2] }}</strong> ({{ song[4] }})<br>
+                {{ song[3] }}<br>
+                <a href="{{ url_for('edit_songs', name=artist, id=song[0]) }}">Editar</a>
+            </li>
+            <hr>
+        {% endfor %}
+    </ul>
+    <a href="{{ url_for('artist_dashboard', name=artist) }}">Voltar ao perfil</a>
+</body>
+</html>
