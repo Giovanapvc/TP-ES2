@@ -134,53 +134,6 @@ def edit_songs(name, id):
         return render_template('/artists/edit_songs.html', artist=name, song=song)
     else:
         return "Música não encontrada", 404
-    
-@app.route('/artist/<name>/stats', methods=['GET', 'POST'])
-def artist_stats(name):
-
-    if session.get('artist') != name:
-        return redirect(url_for('artist_login'))
-
-
-    artist = session.get('artist')
-    if not artist:
-        flash("Você precisa estar logado como artista.")
-        return redirect(url_for('artist_login'))
-
-    conn = connect_db()
-    conn.row_factory = sqlite3.Row
-    cur = conn.cursor()
-
-    # Recupera ID do artista
-    cur.execute("SELECT id FROM artists WHERE name = ?", (artist,))
-    artist_row = cur.fetchone()
-    if not artist_row:
-        flash("Artista não encontrado.")
-        return redirect(url_for('artist_dashboard'))
-
-    artist_id = artist_row['id']
-
-    # Total de likes nas músicas do artista
-    cur.execute("""
-        SELECT COUNT(*) AS total_likes
-        FROM likes
-        JOIN songs ON likes.target_id = songs.id
-        WHERE likes.type = 'song' AND songs.artist_id = ?
-    """, (artist_id,))
-    total_likes = cur.fetchone()['total_likes']
-
-    # Total de opiniões nas músicas do artista
-    cur.execute("""
-        SELECT COUNT(*) AS total_opinions
-        FROM opinions
-        JOIN songs ON opinions.target_id = songs.id
-        WHERE opinions.type = 'song' AND songs.artist_id = ?
-    """, (artist_id,))
-    total_opinions = cur.fetchone()['total_opinions']
-
-    conn.close()
-
-    return render_template('artists/stats.html', artist=artist, total_likes=total_likes, total_opinions=total_opinions)
 
 
 # ========== USER FLOW ==========
@@ -220,6 +173,7 @@ def user_login():
 
 @app.route('/user/<name>')
 def user_dashboard(name):
+    session.pop('last_genres', None)
     return render_template('users/user_dashboard.html', user=name)
 
 @app.route('/user/<name>/liked')
@@ -246,22 +200,6 @@ def all_likes(name):
 
     conn.close()
     return render_template('users/liked.html', user=name, songs=songs, artists=artists)
-
-@app.route('/user/<name>/opinions')
-def user_opinions(name):
-    conn = connect_db()
-    cur = conn.cursor()
-    cur.execute("""
-        SELECT o.type, o.target_id, o.text,
-        CASE o.type WHEN 'song' THEN (SELECT title FROM songs WHERE id = o.target_id)
-                    WHEN 'artist' THEN (SELECT name FROM artists WHERE id = o.target_id)
-        END AS nome
-        FROM opinions o
-        WHERE o.user = ? 
-    """, (name,))
-    opinions = cur.fetchall()
-    conn.close()
-    return render_template('users/opinions.html', user=name, opinions=opinions)
 
 @app.route('/like', methods=['POST'])
 def give_like():
@@ -291,30 +229,16 @@ def give_like():
     conn.commit()
     conn.close()
 
-    return redirect(request.referrer)
+    if 'last_genres' in session:
+        genres = session['last_genres']
+        return redirect(url_for('search_by_genre', genres=genres))
 
-@app.route('/opinion', methods=['POST'])
-def give_opinion():
-    user = request.form['user']
-    type_ = request.form['type']
-    target_id = int(request.form['target_id'])
-    text = request.form['text']
-
-    conn = connect_db()
-    cur = conn.cursor()
-    cur.execute("""
-        INSERT INTO opinions (user, type, target_id, text)
-        VALUES (?, ?, ?, ?)
-        ON CONFLICT(user, type, target_id) DO UPDATE SET text=excluded.text
-    """, (user, type_, target_id, text))
-    conn.commit()
-    conn.close()
-
-    flash('Opinião enviada!')
-    return redirect(request.referrer)
+    ref = request.referrer or url_for('user_dashboard', name=user)
+    return redirect(ref)
 
 @app.route('/search/most_liked')
 def most_liked():
+    session.pop('last_genres', None)
     user = request.args.get('user', '')
     conn = connect_db()
     conn.row_factory = sqlite3.Row
@@ -360,11 +284,10 @@ def search_by_genre():
 
         session['last_genres'] = genres
     else:
-        session.pop('last_genres', None)
-        return render_template('users/search_by_genre_form.html', user=user)
+        genres = request.args.getlist('genres')
+        if not genres:
+            return render_template('users/search_by_genre_form.html', user=user)
     
-    genres=session.get('last_genres')
-
     conn = connect_db()
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
@@ -394,8 +317,14 @@ def search_by_genre():
                            songs=songs, artists=artists, genres=genres,
                            user=user, liked_items=liked_items)
 
+@app.route('/search/genre/reset')
+def reset_genre_search():
+    session.pop('last_genres', None)
+    return redirect(url_for('search_by_genre'))
+
 @app.route('/search/name', methods=['GET', 'POST'])
 def search_by_name():
+    session.pop('last_genres', None)
     if request.method == 'POST':
         termo = request.form['name']
         user = request.form['user']

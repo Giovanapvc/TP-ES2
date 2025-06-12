@@ -27,11 +27,3 @@ CREATE TABLE IF NOT EXISTS likes (
     value INTEGER CHECK(value IN (-1, 1)),
     PRIMARY KEY (user, type, target_id)
 );
-
-CREATE TABLE IF NOT EXISTS opinions (
-    user TEXT,
-    type TEXT CHECK(type IN ('song', 'artist')),
-    target_id INTEGER,
-    text TEXT,
-    PRIMARY KEY (user, type, target_id)
-);

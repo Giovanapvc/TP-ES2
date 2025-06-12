@@ -39,13 +39,6 @@
                                     {{ 'Descurtir' if ('song', song['id']) in liked_items else 'Curtir' }}
                                 </button>
                             </form>
-                            <form method="POST" action="{{ url_for('give_opinion') }}">
-                                <input type="hidden" name="user" value="{{ user }}">
-                                <input type="hidden" name="type" value="song">
-                                <input type="hidden" name="target_id" value="{{ song['id'] }}">
-                                <input type="text" name="text" placeholder="Sua opinião">
-                                <button type="submit">Opinar</button>
-                            </form>
                         </li>
                     {% endfor %}
                 </ul>
@@ -69,13 +62,6 @@
                                 <button type="submit">
                                     {{ 'Descurtir' if ('artist', artist['id']) in liked_items else 'Curtir' }}
                                 </button>
-                            </form>
-                            <form method="POST" action="{{ url_for('give_opinion') }}">
-                                <input type="hidden" name="user" value="{{ user }}">
-                                <input type="hidden" name="type" value="artist">
-                                <input type="hidden" name="target_id" value="{{ artist['id'] }}">
-                                <input type="text" name="text" placeholder="Sua opinião">
-                                <button type="submit">Opinar</button>
                             </form>
                         </li>
                     {% endfor %}

@@ -23,7 +23,19 @@
         <input type="text" name="title" value="{{ song[2] }}"><br><br>
 
         <label for="genre">Gênero:</label><br>
-        <input type="text" name="genre" value="{{ song[4] }}"><br><br>
+        <select name="genre" required>
+            <option value="rock" {% if song[4] == 'rock' %}selected{% endif %}>rock</option>
+            <option value="pop" {% if song[4] == 'pop' %}selected{% endif %}>pop</option>
+            <option value="jazz" {% if song[4] == 'jazz' %}selected{% endif %}>jazz</option>
+            <option value="hip-hop" {% if song[4] == 'hip-hop' %}selected{% endif %}>hip-hop</option>
+            <option value="blues" {% if song[4] == 'blues' %}selected{% endif %}>blues</option>
+            <option value="metal" {% if song[4] == 'metal' %}selected{% endif %}>metal</option>
+            <option value="classical" {% if song[4] == 'classical' %}selected{% endif %}>classical</option>
+            <option value="electronic" {% if song[4] == 'electronic' %}selected{% endif %}>electronic</option>
+            <option value="folk" {% if song[4] == 'folk' %}selected{% endif %}>folk</option>
+            <option value="other" {% if song[4] == 'other' %}selected{% endif %}>other</option>
+        </select><br><br>
+
 
         <label for="description">Descrição:</label><br>
         <textarea name="description">{{ song[3] }}</textarea><br><br>
