@@ -13,3 +13,5 @@ Ao chegar na página inicial, qualquer visitante pode optar por criar um perfil 
 **Instruções para utilizar o sistema**
 
 ## Explicação das tecnologias utilizadas
+
+O trabalho foi implementado em Python, usando Flask como framework web e Jinja2 para templates. Para persistência, adotamos SQLite (arquivo data.db), acessado via sqlite3. A suíte de testes foi construída com pytest. O gerenciamento de dependências é feito com pip/requirements.txt, o código versionado em Git e integrado continuamente via GitHub Actions.
