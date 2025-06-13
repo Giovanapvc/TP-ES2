@@ -4,6 +4,9 @@ from entities import GENRES, Artist, Song
 
 CANCEL_KEY = "F"
 
+# --------------------------------------------------------------------
+# Utilidades de I/O simples
+# --------------------------------------------------------------------
 def pause():
     input("\nPressione Enter para continuar…")
 
@@ -28,10 +31,18 @@ def inp(prompt: str):
 # --------------------------------------------------------------------
 # CLI COM CLICK
 # --------------------------------------------------------------------
-@click.group(help="Catálogo de músicas – artistas independentes.")
-def main():
+@click.group(
+    help="Catálogo de músicas – artistas independentes.",
+    invoke_without_command=True,
+)
+@click.pass_context
+def main(ctx):
     """Comando raiz (grupo) da aplicação."""
-    pass
+    if ctx.invoked_subcommand is None:
+        # nenhum subcomando → erro + usage
+        click.echo("Error: faltou especificar um subcomando.\n", err=True)
+        click.echo(ctx.get_help(), err=True)
+        ctx.exit(1)
 
 # -------- Subcomando: modo interativo (menus em texto) --------------
 @main.command(help="Entra no modo interativo em texto (menus).")
@@ -39,23 +50,30 @@ def interactive():
     _interactive_main()
 
 # -------- Subcomando: exportar para HTML ----------------------------
-@main.command(help="Exporta todo o catálogo para um arquivo HTML.")
+@main.command(name="export", help="Exporta todo o catálogo para um arquivo HTML.")
 @click.option(
     "-o", "--output",
     type=click.Path(dir_okay=False, writable=True, resolve_path=True),
     default="catalogo.html",
     show_default=True,
-    help="Arquivo HTML de saída."
+    help="Arquivo HTML de saída.",
 )
-def export_html(output):
+def export_cmd(output):
+    """Gera arquivo HTML com todo o catálogo."""
     store = repo.load()
     service.export_html(store, output)
     click.echo(f"✔ HTML gerado em {output}")
 
+# --------------------------------------------------------------------
+# IMPLEMENTAÇÃO DO MODO INTERATIVO (antigo main)
+# --------------------------------------------------------------------
 def _interactive_main():
     store = repo.load()
     while True:
-        choice = choose("Menu principal", {"A": "Sou artista", "U": "Sou usuário", "Q": "Sair"})
+        choice = choose(
+            "Menu principal",
+            {"A": "Sou artista", "U": "Sou usuário", "Q": "Sair"},
+        )
         if choice in ("Q", CANCEL_KEY):
             break
         if choice == "A":
