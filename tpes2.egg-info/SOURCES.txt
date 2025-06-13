@@ -4,11 +4,7 @@ export_html.py
 repo.py
 service.py
 setup.py
-tests/test_cli.py
-tests/test_entities.py
-tests/test_imports.py
-tests/test_repo.py
-tests/test_service.py
+tests/test_app.py
 tpes2.egg-info/PKG-INFO
 tpes2.egg-info/SOURCES.txt
 tpes2.egg-info/dependency_links.txt
