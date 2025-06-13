@@ -22,7 +22,7 @@ Após a instalação, navegue até o diretório raiz do repositório e execute o
 
 **python3 app.py**
 
-O programa será inicializado e pode ser acessado através do navegador pelo endereço informado no terminal pelo framework. Para encerrar o programa, use Ctrl + C no terminal.
+O programa será inicializado e pode ser acessado no navegador através do endereço informado pelo framework no terminal (possivelmente localhost:5000). Para encerrar o programa, use Ctrl + C no terminal.
 
 ## Explicação das tecnologias utilizadas
 
