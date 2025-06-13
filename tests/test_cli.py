@@ -12,10 +12,12 @@ def test_cli__help_shows_usage(runner):
     assert "Usage:" in result.output
 
 def test_cli__missing_args_errors(runner):
-    result = runner.invoke(main, [], mix_stderr=True)  
+    result = runner.invoke(main, [])          
     assert result.exit_code != 0
-    assert "error:" in result.output.lower()
+    stderr = getattr(result, "stderr", "") or ""
+    combined = (stderr + result.output).lower()
 
+    assert "error" in combined
 
 def test_cli__export_html_creates_file(tmp_path, runner):
     out = tmp_path / "out.html"
