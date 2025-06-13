@@ -1,2 +1,2 @@
 pytest>=8.2
-click
+click>=8.0
