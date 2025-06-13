@@ -1,0 +1,5 @@
+Metadata-Version: 2.4
+Name: tpes2
+Version: 0.1
+Requires-Dist: click
+Dynamic: requires-dist
