@@ -1,0 +1,30 @@
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>{{ artist }} - Minha Página</title>
+</head>
+
+<body>
+  
+  {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul class="flashes">
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+  
+  <h2>Painel do artista: {{ artist }}</h2>
+  <ul>
+    <li><a href="/artist/{{ artist }}/add">Adicionar música</a></li>
+    <li><a href="/artist/{{ artist }}/songs">Minhas músicas</a></li>
+  </ul>
+  <br>
+  <form action="/" method="get" style="display: inline;">
+    <button type="submit" class="button">Sair</button>
+  </form>
+  
+</body>

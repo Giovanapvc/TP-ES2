@@ -1,0 +1,42 @@
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>{{ user }} - Minha Página</title>
+</head>
+
+<body>
+
+  {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul class="flashes">
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
+  <h1>Bem-vindo(a), {{ user }}</h1>
+
+    <h2>Suas atividades</h2>
+    <ul>
+      <li><a href="/user/{{ user }}/liked">Minhas Curtidas</a></li>
+    </ul>
+
+    <h2>Explorar</h2>
+    <ul>
+        <li><a href="/search/most_liked?user={{ user }}">Buscar Músicas Mais Curtidas</a></li>
+        <li><a href="/search/genre?user={{ user }}">Buscar por Gênero</a></li>
+        <li>
+          <form action="{{ url_for('search_by_name') }}" method="post">
+            <input type="hidden" name="user" value="{{ user }}">
+            <input type="text" name="name" placeholder="Buscar por nome" required>
+            <button type="submit">Buscar</button>
+          </form>
+        </li>
+    </ul>
+
+    <br>
+    <a href="/">Sair</a>
+</body>

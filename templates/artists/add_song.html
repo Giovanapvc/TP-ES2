@@ -1,0 +1,43 @@
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>{{ artist }}: nova música</title>
+</head>
+
+<body>
+  
+  {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul class="flashes">
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
+  <h2>Adicionar Música</h2>
+  <form method="post">
+    Título: <input name="title" required><br>
+    Descrição: <input name="description" required><br>
+    Gênero:
+    <select name="genre" required>
+      <option>rock</option>
+      <option>pop</option>
+      <option>jazz</option>
+      <option>hip-hop</option>
+      <option>blues</option>
+      <option>metal</option>
+      <option>classical</option>
+      <option>electronic</option>
+      <option>folk</option>
+      <option>other</option>
+    </select><br>
+    Link: <input name="link"><br>
+    File Path: <input name="file_path"><br>
+    <button type="submit">Adicionar</button>
+  </form>
+  <a href="{{ url_for('artist_dashboard', name=artist) }}">Voltar ao perfil</a>
+  
+</body>

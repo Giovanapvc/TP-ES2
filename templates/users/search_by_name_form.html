@@ -1,0 +1,27 @@
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Busca por Nome</title>
+</head>
+
+<body>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul class="flashes">
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
+    <h1>Buscar por Nome</h1>
+    <form action="{{ url_for('search_by_name') }}" method="post">
+        <input type="text" name="name" placeholder="Digite o nome de uma música ou artista" required>
+        <input type="hidden" name="user" value="{{ user }}">
+        <button type="submit">Buscar</button>
+    </form>
+    <a href="/">Voltar</a>
+</body>

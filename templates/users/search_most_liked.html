@@ -1,0 +1,77 @@
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Mais Curtidos</title>
+</head>
+
+<body>
+    
+    <header>
+        <h1>Mais Curtidos</h1>
+    </header>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul class="flashes">
+          {% for message in messages %}
+            <li>{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
+    <main>
+
+        <section>
+            <h2>Músicas Mais Curtidas</h2>
+            {% if songs %}
+                <ul>
+                    {% for song in songs %}
+                        <li>
+                            <strong>{{ song['title'] }}</strong> - {{ song['artist_name'] }} (Curtidas: {{ song['total_likes'] }})
+                            <form method="POST" action="{{ url_for('give_like') }}">
+                                <input type="hidden" name="user" value="{{ user }}">
+                                <input type="hidden" name="type" value="song">
+                                <input type="hidden" name="target_id" value="{{ song['id'] }}">
+                                <input type="hidden" name="value" value="{{ 0 if ('song', song['id']) in liked_items else 1 }}">
+                                <button type="submit">
+                                    {{ 'Descurtir' if ('song', song['id']) in liked_items else 'Curtir' }}
+                                </button>
+                            </form>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>Nenhuma música encontrada.</p>
+            {% endif %}
+        </section>
+
+        <section>
+            <h2>Artistas Mais Curtidos</h2>
+            {% if artists %}
+                <ul>
+                    {% for artist in artists %}
+                        <li>
+                            <strong>{{ artist['name'] }}</strong> (Curtidas: {{ artist['total_likes'] }})
+                            <form method="POST" action="{{ url_for('give_like') }}">
+                                <input type="hidden" name="user" value="{{ user }}">
+                                <input type="hidden" name="type" value="artist">
+                                <input type="hidden" name="target_id" value="{{ artist['id'] }}">
+                                <input type="hidden" name="value" value="{{ 0 if ('artist', artist['id']) in liked_items else 1 }}">
+                                <button type="submit">
+                                    {{ 'Descurtir' if ('artist', artist['id']) in liked_items else 'Curtir' }}
+                                </button>
+                            </form>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>Nenhum artista encontrado.</p>
+            {% endif %}
+        </section>
+
+        <a href="{{ url_for('user_dashboard', name=user) }}">Voltar para o painel</a>
+    </main>
+
+</body>
