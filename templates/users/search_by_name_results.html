@@ -1,75 +1,84 @@
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <title>Resultados - Busca por "{{ termo }}"</title>
-</head>
-
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>…</head>
 <body>
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}<ul class="flashes">{% for m in messages %}<li>{{m}}</li>{% endfor %}</ul>{% endif %}
+  {% endwith %}
+  <h1>Resultados da Busca “{{ termo }}” – {{ user }}</h1>
+  <a href="{{ url_for('user_dashboard', name=user) }}">← Voltar</a>
 
-    <h1>Resultados da busca por: "{{ termo }}"</h1>
+  <h2>Músicas</h2>
+  {% if songs %}
+  <table>
+    <thead><tr>
+      <th>Título</th><th>Artista</th><th>Link</th><th>Ação</th><th>Opiniões</th>
+    </tr></thead>
+    <tbody>
+      {% for s in songs %}
+      <tr>
+        <td>{{ s.title }}</td>
+        <td>{{ s.artist_name }}</td>
+        <td>{% if s.link %}<a href="{{s.link}}" target="_blank">Link</a>{% else %}Sem link{% endif %}</td>
+        <td>
+          <form action="{{ url_for('give_like') }}" method="post">
+            <input type="hidden" name="user" value="{{ user }}">
+            <input type="hidden" name="type" value="song">
+            <input type="hidden" name="target_id" value="{{ s.id }}">
+            <button type="submit" name="value"
+                    value="{% if ('song',s.id) in liked_items %}0{% else %}1{% endif %}">
+              {% if ('song',s.id) in liked_items %}Descurtir{% else %}Curtir{% endif %}
+            </button>
+          </form>
+        </td>
+        <td>
+          <ul class="opinions">
+            {% for o in opinions_map[s.id] %}<li><strong>{{o.user}}:</strong> {{o.text}}</li>{% endfor %}
+          </ul>
+          <form action="{{ url_for('opinion_song', song_id=s.id) }}" method="post">
+            <input type="hidden" name="user" value="{{ user }}">
+            <textarea name="text" required placeholder="Deixe sua opinião..."></textarea><br>
+            <button type="submit">Opinar</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <p>Nenhuma música encontrada.</p>
+  {% endif %}
 
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            <ul class="flashes">
-                {% for message in messages %}
-                    <li>{{ message }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-    {% endwith %}
-
-    <section>
-
-        <h2>Músicas Encontradas</h2>
-        {% if songs %}
-        <ul>
-            {% for song in songs %}
-            <li>
-                <strong>{{ song[2] }}</strong> - Artista {{ song['artist_name'] }} (Gênero: {{ song[4] }})
-                <form action="{{ url_for('give_like') }}" method="post" style="display:inline;">
-                    <input type="hidden" name="user" value="{{ user }}">
-                    <input type="hidden" name="type" value="song">
-                    <input type="hidden" name="target_id" value="{{ song['id'] }}">
-                    <input type="hidden" name="value" value="{{ 0 if ('song', song['id']) in liked_items else 1 }}">
-                    <button type="submit">
-                        {{ 'Descurtir' if ('song', song['id']) in liked_items else 'Curtir' }}
-                    </button>
-                </form>
-            </li>
-            {% endfor %}
-        </ul>
-        {% else %}
-        <p>Nenhuma música encontrada.</p>
-        {% endif %}
-    </section>
-        
-    <section>
-
-        
-        <h2>Artistas Encontrados</h2>
-        {% if artists %}
-        <ul>
-            {% for artist in artists %}
-            <li>
-                <strong>{{ artist['name'] }}</strong>
-                <form action="{{ url_for('give_like') }}" method="POST" style="display:inline;">
-                    <input type="hidden" name="user" value="{{ user }}">
-                    <input type="hidden" name="type" value="artist">
-                    <input type="hidden" name="target_id" value="{{ artist['id'] }}">
-                    <input type="hidden" name="value" value="{{ 0 if ('artist', artist['id']) in liked_items else 1 }}">
-                    <button type="submit">
-                        {{ 'Descurtir' if ('artist', artist['id']) in liked_items else 'Curtir' }}
-                    </button>
-                </form>
-            </li>
-            {% endfor %}
-        </ul>
-        {% else %}
-        <p>Nenhum artista encontrado.</p>
-        {% endif %}
-    </section>
-
-    <a href="{{ url_for('user_dashboard', name=user) }}">Voltar ao Painel</a>
-
+  <h2>Artistas</h2>
+  {% if artists %}
+  <ul>
+    {% for a in artists %}
+    <li>
+      {{ a.name }}
+      <form action="{{ url_for('give_like') }}" method="post" style="display:inline">
+        <input type="hidden" name="user" value="{{ user }}">
+        <input type="hidden" name="type" value="artist">
+        <input type="hidden" name="target_id" value="{{ a.id }}">
+        <button type="submit" name="value"
+                value="{% if ('artist',a.id) in liked_items %}0{% else %}1{% endif %}">
+          {% if ('artist',a.id) in liked_items %}Descurtir{% else %}Curtir{% endif %}
+        </button>
+      </form>
+      <ul class="opinions">
+        {% for o in artist_opinions_map[a.id] %}
+          <li><strong>{{o.user}}:</strong> {{o.text}}</li>
+        {% endfor %}
+      </ul>
+      <form action="{{ url_for('opinion_artist', artist_id=a.id) }}" method="post">
+        <input type="hidden" name="user" value="{{ user }}">
+        <textarea name="text" required placeholder="Opine sobre o artista..."></textarea><br>
+        <button type="submit">Opinar</button>
+      </form>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+    <p>Nenhum artista encontrado.</p>
+  {% endif %}
 </body>
+</html>

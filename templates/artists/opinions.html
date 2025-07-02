@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Opiniões — {{ artist }}</title>
+</head>
+<body>
+  <h1>Opiniões sobre {{ artist }}</h1>
+  <a href="{{ url_for('artist_dashboard', name=artist) }}">← Voltar</a>
+
+  <h2>Opiniões sobre seu perfil</h2>
+  {% if artist_opinions %}
+  <ul>
+    {% for o in artist_opinions %}
+      <li><strong>{{ o.user }}:</strong> {{ o.text }}</li>
+    {% endfor %}
+  </ul>
+  {% else %}
+    <p>Ninguém opinou sobre seu perfil ainda.</p>
+  {% endif %}
+
+  <h2>Opiniões sobre suas músicas</h2>
+  {% if song_opinions %}
+  <ul>
+    {% for o in song_opinions %}
+      <li>
+        <strong>{{ o.user }}</strong> sobre <em>{{ o.title }}</em>:<br>
+        {{ o.text }}
+      </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+    <p>Nenhuma opinião sobre suas músicas ainda.</p>
+  {% endif %}
+</body>
+</html>

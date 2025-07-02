@@ -8,14 +8,14 @@
 <body>
   
   {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            <ul class="flashes">
-                {% for message in messages %}
-                    <li>{{ message }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-    {% endwith %}
+    {% if messages %}
+      <ul class="flashes">
+        {% for message in messages %}
+          <li>{{ message }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  {% endwith %}
 
   <h2>Adicionar Música</h2>
   <form method="post">
@@ -34,7 +34,10 @@
       <option>folk</option>
       <option>other</option>
     </select><br>
-    Link: <input name="link"><br>
+    Link: 
+    <input name="link" type="url" required>
+    <span class="aviso">Sua música deve ser ouvida! Insira seu link!</span>
+    <br>
     File Path: <input name="file_path"><br>
     <button type="submit">Adicionar</button>
   </form>

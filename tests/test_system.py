@@ -13,7 +13,6 @@ import app as flask_app
 
 @pytest.fixture
 def system_client(tmp_path, monkeypatch):
-    """Fixture de sistema: copia data.db e retorna test_client + conexão SQLite."""
     orig = ROOT / "data.db"
     if not orig.exists():
         raise FileNotFoundError("data.db não encontrado")

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ song['title'] }} — {{ song['artist_name'] }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <a href="{{ request.referrer or url_for('index') }}">← Voltar</a>
+  <h1>{{ song['title'] }}</h1>
+  <p><strong>Artista:</strong> {{ song['artist_name'] }}</p>
+  <p><strong>Gênero:</strong> {{ song['genre'] }}</p>
+  <p><strong>Descrição:</strong> {{ song['description'] }}</p>
+
+  {% if song['link'] %}
+    <p><strong>YouTube:</strong>
+      <a href="{{ song['link'] }}" target="_blank">{{ song['link'] }}</a>
+    </p>
+  {% endif %}
+
+  <hr>
+
+  {% if session.get('user') %}
+    <section class="give-opinion">
+      <h2>Deixe sua opinião</h2>
+      <form method="post">
+        <textarea name="text" rows="3" required></textarea><br>
+        <button type="submit">Enviar opinião</button>
+      </form>
+    </section>
+    <hr>
+  {% endif %}
+
+  <section class="opinions">
+    <h2>Opiniões ({{ opinions|length }})</h2>
+    {% if opinions %}
+      <ul>
+        {% for op in opinions %}
+          <li>
+            <p>
+              <strong>{{ op['user_name'] }}</strong>
+              <em>em {{ op['created_at'] }}</em>
+            </p>
+            <blockquote>{{ op['text'] }}</blockquote>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>Sem opiniões ainda.</p>
+    {% endif %}
+  </section>
+</body>
+</html>

@@ -27,3 +27,14 @@ CREATE TABLE IF NOT EXISTS likes (
     value INTEGER CHECK(value IN (-1, 1)),
     PRIMARY KEY (user, type, target_id)
 );
+
+CREATE TABLE IF NOT EXISTS opinions (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  user        TEXT    NOT NULL,                            
+  type        TEXT    NOT NULL CHECK(type IN ('song','artist')),
+  target_id   INTEGER NOT NULL,
+  text        TEXT    NOT NULL,
+  created_at  DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY(user)      REFERENCES users(name),
+  FOREIGN KEY(target_id) REFERENCES songs(id)      
+);

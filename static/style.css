@@ -24,6 +24,12 @@ h1 {
     background-color: #45a049;
 }
 
+.aviso {
+  color: #d00;
+  font-size: 0.9em;
+  margin-left: 8px;
+}
+
 ul {
     list-style-type: none;
     padding-left: 0;

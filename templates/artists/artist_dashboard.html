@@ -1,30 +1,36 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <title>{{ artist }} - Minha Página</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <title>Painel de {{ artist }}</title>
 </head>
-
 <body>
-  
-  {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            <ul class="flashes">
-                {% for message in messages %}
-                    <li>{{ message }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-    {% endwith %}
-  
   <h2>Painel do artista: {{ artist }}</h2>
+  <p><strong>Biografia:</strong> {{ bio }}</p>
+
+  <h3>Curtidas no seu perfil: {{ total_artist_likes }}</h3>
+  {% if artist_likers %}
+    <p>Usuários que curtiram você:</p>
+    <ul>
+      {% for u in artist_likers %}
+        <li>{{ u }}</li>
+      {% endfor %}
+    </ul>
+  {% else %}
+  {% endif %}
+
+  <p><strong>Total de curtidas em todas as músicas:</strong> {{ total_song_likes }}</p>
+
   <ul>
-    <li><a href="/artist/{{ artist }}/add">Adicionar música</a></li>
-    <li><a href="/artist/{{ artist }}/songs">Minhas músicas</a></li>
+    <li><a href="{{ url_for('add_song', name=artist) }}">Adicionar música</a></li>
+    <li><a href="{{ url_for('list_songs', name=artist) }}">Minhas músicas</a></li>
+    <li><a href="{{ url_for('artist_opinions', name=artist) }}">Ver todas as opiniões</a></li>
   </ul>
-  <br>
-  <form action="/" method="get" style="display: inline;">
-    <button type="submit" class="button">Sair</button>
+
+  <form action="{{ url_for('index') }}" method="get" style="display:inline;">
+    <button type="submit">Sair</button>
   </form>
-  
 </body>
+</html>

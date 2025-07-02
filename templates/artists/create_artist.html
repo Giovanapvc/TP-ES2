@@ -1,31 +1,37 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <title>Artista: nova conta</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <title>Criar Conta de Artista</title>
 </head>
 <body>
-  
+  <h1>Cadastro de Artista</h1>
+
   {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            <ul class="flashes">
-                {% for message in messages %}
-                    <li>{{ message }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-    {% endwith %}
+    {% if messages %}
+      <ul class="flashes">
+        {% for msg in messages %}
+          <li>{{ msg }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  {% endwith %}
 
-  <h2>Criar perfil de artista</h2>
-  <form method="post">
-    Nome artístico: <input name="name"><br>
-    Bio: <input name="bio"><br>
-    <button type="submit" class="button">Criar</button>
+  <form method="post" enctype="multipart/form-data">
+    <label for="name">Nome do Artista:</label><br>
+    <input type="text" id="name" name="name" required><br><br>
+
+    <label for="bio">Biografia:</label><br>
+    <textarea id="bio" name="bio" rows="6" cols="60" placeholder="Conte sua história, influências, discos..." required></textarea><br><br>
+
+    <label for="photo">Foto de Perfil (opcional):</label><br>
+    <input type="file" id="photo" name="photo" accept="image/*"><br><br>
+
+    <button type="submit">Criar Conta</button>
   </form>
 
-  <form action="/artist" method="get" style="display: inline;">
-    <button type="submit">Voltar</button>
-  </form>
-  
+  <p><a href="{{ url_for('index') }}">← Voltar à Home</a></p>
 </body>
-
+</html>
