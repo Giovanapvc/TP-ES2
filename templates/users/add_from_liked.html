@@ -1,0 +1,46 @@
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>{{ user }} - Minha Página</title>
+</head>
+
+<body>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul class="flashes">
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
+    <h1>Músicas Curtidas</h1>
+
+    {% if songs %}
+        <ul>
+            {% for song in songs %}
+                <li>
+                    <strong>{{ song['title'] }}</strong> - {{ song['artist_name'] }}
+                    {% if playlist_id %}
+                        {% if song['id'] in songs_in_playlist %}
+                            <span>Já está na playlist</span>
+                        {% else %}
+                            <form action="{{ url_for('add_song_to_playlist', playlist_id=playlist_id, song_id=song['id']) }}" method="get">
+                                <button type="submit">Adicionar à Playlist</button>
+                            </form>
+                        {% endif %}
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>Você não curtiu nenhuma música ainda.</p>
+    {% endif %}
+
+    <br>
+    <a href="{{ url_for('view_playlist', playlist_id=playlist_id) }}">Voltar para a Playlist</a>
+
+</body>

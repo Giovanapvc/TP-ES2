@@ -1,29 +1,50 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>…</head>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <title>Mais Curtidas – {{ user }}</title>
+</head>
 <body>
   {% with messages = get_flashed_messages() %}
-    {% if messages %}<ul class="flashes">{% for m in messages %}<li>{{m}}</li>{% endfor %}</ul>{% endif %}
+    {% if messages %}
+      <ul class="flashes">{% for m in messages %}<li>{{ m }}</li>{% endfor %}</ul>
+    {% endif %}
   {% endwith %}
-  <h1>Mais Curtidas – {{ user }}</h1>
+  <h1>Mais Curtidas</h1>
   <a href="{{ url_for('user_dashboard', name=user) }}">← Voltar</a>
 
   <h2>Músicas</h2>
   <table>
-    <thead><tr>
-      <th>Título</th><th>Artista</th><th>Link</th><th>Likes</th><th>Ação</th><th>Opiniões</th>
-    </tr></thead>
+    <thead>
+      <tr>
+        <th>Título</th>
+        <th>Artista</th>
+        <th>Link</th>
+        <th>Total Likes</th>
+        <th>Curtir</th>
+        <th>Rating</th>
+        <th>Opiniões</th>
+      </tr>
+    </thead>
     <tbody>
-      {% for s in songs %}
+    {% for s in songs %}
       <tr>
         <td>{{ s.title }}</td>
         <td>{{ s.artist_name }}</td>
-        <td>{% if s.link %}<a href="{{s.link}}" target="_blank">Link</a>{% else %}Sem link{% endif %}</td>
+        <td>
+          {% if s.link %}
+            <a href="{{ s.link }}" target="_blank">Link</a>
+          {% else %}
+            Sem link
+          {% endif %}
+        </td>
         <td>{{ s.total_likes }}</td>
         <td>
           <form action="{{ url_for('give_like') }}" method="post">
-            <input type="hidden" name="user" value="{{ user }}">
-            <input type="hidden" name="type" value="song">
+            <input type="hidden" name="user"      value="{{ user }}">
+            <input type="hidden" name="type"      value="song">
             <input type="hidden" name="target_id" value="{{ s.id }}">
             <button type="submit" name="value"
                     value="{% if ('song',s.id) in liked_items %}0{% else %}1{% endif %}">
@@ -32,8 +53,22 @@
           </form>
         </td>
         <td>
+          <form action="{{ url_for('give_rating') }}" method="post" class="rating-form">
+            <input type="hidden" name="user"      value="{{ user }}">
+            <input type="hidden" name="type"      value="song">
+            <input type="hidden" name="target_id" value="{{ s.id }}">
+            {% for i in range(1,6) %}
+              <button type="submit" name="value" value="{{ i }}">
+                {% if ratings.get(('song',s.id),0) >= i %}★{% else %}☆{% endif %}
+              </button>
+            {% endfor %}
+          </form>
+        </td>
+        <td>
           <ul class="opinions">
-            {% for o in opinions_map[s.id] %}<li><strong>{{o.user}}:</strong> {{o.text}}</li>{% endfor %}
+            {% for o in opinions_map[s.id] %}
+              <li><strong>{{ o.user }}:</strong> {{ o.text }}</li>
+            {% endfor %}
           </ul>
           <form action="{{ url_for('opinion_song', song_id=s.id) }}" method="post">
             <input type="hidden" name="user" value="{{ user }}">
@@ -42,22 +77,30 @@
           </form>
         </td>
       </tr>
-      {% endfor %}
+    {% endfor %}
     </tbody>
   </table>
 
   <h2>Artistas</h2>
   <table>
-    <thead><tr><th>Nome</th><th>Likes</th><th>Ação</th><th>Opiniões</th></tr></thead>
+    <thead>
+      <tr>
+        <th>Nome</th>
+        <th>Total Likes</th>
+        <th>Curtir</th>
+        <th>Rating</th>
+        <th>Opiniões</th>
+      </tr>
+    </thead>
     <tbody>
-      {% for a in artists %}
+    {% for a in artists %}
       <tr>
         <td>{{ a.name }}</td>
         <td>{{ a.total_likes }}</td>
         <td>
           <form action="{{ url_for('give_like') }}" method="post">
-            <input type="hidden" name="user" value="{{ user }}">
-            <input type="hidden" name="type" value="artist">
+            <input type="hidden" name="user"      value="{{ user }}">
+            <input type="hidden" name="type"      value="artist">
             <input type="hidden" name="target_id" value="{{ a.id }}">
             <button type="submit" name="value"
                     value="{% if ('artist',a.id) in liked_items %}0{% else %}1{% endif %}">
@@ -66,9 +109,21 @@
           </form>
         </td>
         <td>
+          <form action="{{ url_for('give_rating') }}" method="post" class="rating-form">
+            <input type="hidden" name="user"      value="{{ user }}">
+            <input type="hidden" name="type"      value="artist">
+            <input type="hidden" name="target_id" value="{{ a.id }}">
+            {% for i in range(1,6) %}
+              <button type="submit" name="value" value="{{ i }}">
+                {% if ratings.get(('artist',a.id),0) >= i %}★{% else %}☆{% endif %}
+              </button>
+            {% endfor %}
+          </form>
+        </td>
+        <td>
           <ul class="opinions">
             {% for o in artist_opinions_map[a.id] %}
-              <li><strong>{{o.user}}:</strong> {{o.text}}</li>
+              <li><strong>{{ o.user }}:</strong> {{ o.text }}</li>
             {% endfor %}
           </ul>
           <form action="{{ url_for('opinion_artist', artist_id=a.id) }}" method="post">
@@ -78,7 +133,7 @@
           </form>
         </td>
       </tr>
-      {% endfor %}
+    {% endfor %}
     </tbody>
   </table>
 </body>
