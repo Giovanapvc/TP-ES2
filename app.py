@@ -334,8 +334,6 @@ def opinion_artist(artist_id):
     conn.close()
     return redirect(request.referrer or url_for('user_dashboard', name=request.form['user']))
 
-# ========== SEARCH ==========
-
 @app.route('/search/most_liked')
 def most_liked():
     session.pop('last_genres', None)
