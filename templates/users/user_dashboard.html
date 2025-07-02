@@ -1,43 +1,25 @@
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <title>{{ user }} - Minha Página</title>
-</head>
+{% extends "base.html" %}
+{% block title %}Painel de {{ user }} – IndieFriends{% endblock %}
 
-<body>
+{% block content %}
+  <h2 class="text-2xl font-semibold mb-8">Bem-vindo, {{ user }}!</h2>
 
-  {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            <ul class="flashes">
-                {% for message in messages %}
-                    <li>{{ message }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-    {% endwith %}
-
-  <h1>Bem-vindo(a), {{ user }}</h1>
-
-    <h2>Suas atividades</h2>
-    <ul>
-      <li><a href="/user/{{ user }}/liked">Minhas Curtidas</a></li>
-      <li><a href="{{ url_for('user_playlists') }}?user={{ user }}">Minhas Playlists</a></li>
-    </ul>
-
-    <h2>Explorar</h2>
-    <ul>
-        <li><a href="/search/most_liked?user={{ user }}">Buscar Mais Curtidos</a></li>
-        <li><a href="/search/genre?user={{ user }}">Buscar por Gênero</a></li>
-        <li>
-          <form action="{{ url_for('search_by_name') }}" method="post">
-            <input type="hidden" name="user" value="{{ user }}">
-            <input type="text" name="name" placeholder="Buscar por nome" required>
-            <button type="submit">Buscar</button>
-          </form>
-        </li>
-    </ul>
-
-    <br>
-    <a href="/">Sair</a>
-</body>
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+    <a href="{{ url_for('all_likes', name=user) }}"
+       class="bg-white p-6 rounded-lg shadow hover:shadow-lg">
+      <h3 class="font-semibold text-indigo-600">Minhas Curtidas</h3>
+    </a>
+   <a href="{{ url_for('most_liked') }}?user={{ user }}"
+       class="bg-white p-6 rounded-lg shadow hover:shadow-lg">
+      <h3 class="font-semibold text-indigo-600">Mais Curtidas</h3>
+    </a>
+    <a href="{{ url_for('search_by_genre') }}"
+       class="bg-white p-6 rounded-lg shadow hover:shadow-lg">
+      <h3 class="font-semibold text-indigo-600">Buscar por Gênero</h3>
+    </a>
+    <a href="{{ url_for('search_by_name') }}"
+       class="bg-white p-6 rounded-lg shadow hover:shadow-lg">
+      <h3 class="font-semibold text-indigo-600">Buscar por Nome</h3>
+    </a>
+  </div>
+{% endblock %}

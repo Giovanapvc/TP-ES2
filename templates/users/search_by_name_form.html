@@ -1,27 +1,40 @@
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <title>Busca por Nome</title>
-</head>
+{% extends "base.html" %}
+{% block title %}Buscar por Nome – IndieFriends{% endblock %}
 
-<body>
+{% block content %}
+  <div class="flex items-center justify-between mb-6">
+    <h2 class="text-2xl font-semibold">Buscar por Nome</h2>
+    {% if session.get('user') %}
+      {# Se estiver logado, volta ao dashboard do usuário #}
+      <a href="{{ url_for('user_dashboard', name=session.get('user')) }}" class="text-indigo-600 hover:underline">
+        ← Voltar
+      </a>
+    {% else %}
+      {# Se não, volta à tela inicial de usuário #}
+      <a href="{{ url_for('user_initial_screen') }}" class="text-indigo-600 hover:underline">
+        ← Voltar
+      </a>
+    {% endif %}
+  </div>
 
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            <ul class="flashes">
-                {% for message in messages %}
-                    <li>{{ message }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-    {% endwith %}
+  <form method="post" class="space-y-4">
+    <input
+      type="text"
+      name="name"
+      placeholder="Título ou artista"
+      class="w-full p-2 border rounded"
+      required
+    />
+    {% if session.get('user') %}
+      {# só incluímos o hidden quando sabemos quem está buscando #}
+      <input type="hidden" name="user" value="{{ session.get('user') }}"/>
+    {% endif %}
 
-    <h1>Buscar por Nome</h1>
-    <form action="{{ url_for('search_by_name') }}" method="post">
-        <input type="text" name="name" placeholder="Digite o nome de uma música ou artista" required>
-        <input type="hidden" name="user" value="{{ user }}">
-        <button type="submit">Buscar</button>
-    </form>
-    <a href="/">Voltar</a>
-</body>
+    <button
+      type="submit"
+      class="px-6 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+    >
+      Buscar
+    </button>
+  </form>
+{% endblock %}

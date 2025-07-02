@@ -1,3 +1,6 @@
+{% extends "base.html" %}
+{% block title %}Login de Artista – MyMusicApp{% endblock %}
+{% block content %}
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -44,3 +47,6 @@
     <a href="{{ url_for('view_playlist', playlist_id=playlist_id) }}">Voltar para a Playlist</a>
 
 </body>
+{% endblock %}
+
+

@@ -1,3 +1,6 @@
+{% extends "base.html" %}
+{% block title %}Login de Artista – MyMusicApp{% endblock %}
+{% block content %}
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -44,3 +47,6 @@
   <a href="{{ url_for('artist_dashboard', name=artist) }}">Voltar ao perfil</a>
   
 </body>
+{% endblock %}
+
+

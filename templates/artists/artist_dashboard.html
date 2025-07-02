@@ -1,36 +1,56 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-  <title>Painel de {{ artist }}</title>
-</head>
-<body>
-  <h2>Painel do artista: {{ artist }}</h2>
-  <p><strong>Biografia:</strong> {{ bio }}</p>
+{% extends "base.html" %}
+{% block title %}Painel de {{ artist }} – IndieFriends{% endblock %}
 
+{% block content %}
+  <h2 class="text-2xl font-semibold mb-2">Painel do artista: {{ artist }}</h2>
+  <p class="mb-6"><strong>Biografia:</strong> {{ bio }}</p>
+
+  {# legacy headings (tests expect these exact strings) #}
   <h3>Curtidas no seu perfil: {{ total_artist_likes }}</h3>
   <h3>Média de estrelas recebidas: {{ avg_artist_rating|round(1) }}</h3>
+
+  {# new 3-card statistic layout #}
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 my-6">
+    <div class="bg-white p-4 rounded-lg shadow">
+      <h4 class="font-semibold text-indigo-600 mb-1">Curtidas no Perfil</h4>
+      <p class="text-3xl">{{ total_artist_likes }}</p>
+    </div>
+    <div class="bg-white p-4 rounded-lg shadow">
+      <h4 class="font-semibold text-indigo-600 mb-1">Média de Estrelas</h4>
+      <p class="text-3xl">{{ avg_artist_rating|round(1) }}</p>
+    </div>
+    <div class="bg-white p-4 rounded-lg shadow">
+      <h4 class="font-semibold text-indigo-600 mb-1">Curtidas em Músicas</h4>
+      <p class="text-3xl">{{ total_song_likes }}</p>
+    </div>
+  </div>
+
+  {# list of users who liked this artist #}
   {% if artist_likers %}
-    <p>Usuários que curtiram você:</p>
-    <ul>
-      {% for u in artist_likers %}
-        <li>{{ u }}</li>
-      {% endfor %}
-    </ul>
+    <div class="bg-white p-4 rounded-lg shadow mb-6">
+      <h4 class="font-semibold mb-2">Usuários que curtiram você</h4>
+      <ul class="list-disc pl-5 space-y-1">
+        {% for u in artist_likers %}
+          <li>{{ u }}</li>
+        {% endfor %}
+      </ul>
+    </div>
   {% endif %}
 
-  <p><strong>Total de curtidas em todas as músicas:</strong> {{ total_song_likes }}</p>
+  {# action buttons #}
+  <div class="space-x-4">
+    <a href="{{ url_for('add_song', name=artist) }}"
+       class="inline-block px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-600">
+      Adicionar música
+    </a>
+    <a href="{{ url_for('list_songs', name=artist) }}"
+       class="inline-block px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-600">
+      Minhas músicas
+    </a>
+  </div>
 
-  <ul>
-    <li><a href="{{ url_for('add_song', name=artist) }}">Adicionar música</a></li>
-    <li><a href="{{ url_for('list_songs', name=artist) }}">Minhas músicas</a></li>
-    {# Removido o link "Ver todas as opiniões" para não causar BuildError #}
-  </ul>
-
-  <form action="{{ url_for('index') }}" method="get" style="display:inline;">
-    <button type="submit">Sair</button>
+  {# logout button #}
+  <form action="{{ url_for('index') }}" method="get" class="mt-6">
+    <button type="submit" class="text-gray-600 hover:underline">Sair</button>
   </form>
-</body>
-</html>
+{% endblock %}

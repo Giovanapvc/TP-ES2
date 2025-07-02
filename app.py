@@ -261,6 +261,7 @@ def user_dashboard(name):
 @app.route('/user/<name>/liked')
 def all_likes(name):
     conn = get_conn(); cur = conn.cursor()
+    # músicas curtidas
     cur.execute("""
         SELECT s.id, s.title, a.name AS artist_name, s.link
           FROM songs s
@@ -269,6 +270,8 @@ def all_likes(name):
          WHERE l.user = ? AND l.type = 'song' AND l.value = 1
     """, (name,))
     songs = cur.fetchall()
+
+    # artistas curtidos
     cur.execute("""
         SELECT a.id, a.name
           FROM artists a
@@ -277,6 +280,7 @@ def all_likes(name):
     """, (name,))
     artists = cur.fetchall()
 
+    # opiniões
     opinions_map = {}
     artist_opinions_map = {}
     for s in songs:
@@ -285,6 +289,11 @@ def all_likes(name):
     for a in artists:
         cur.execute("SELECT user, text FROM opinions WHERE type='artist' AND target_id = ?", (a['id'],))
         artist_opinions_map[a['id']] = cur.fetchall()
+
+    # novas linhas: carregar ratings do usuário
+    cur.execute("SELECT type, target_id, value FROM ratings WHERE user = ?", (name,))
+    ratings_map = {(r['type'], r['target_id']): r['value'] for r in cur.fetchall()}
+
     conn.close()
 
     return render_template(
@@ -293,7 +302,8 @@ def all_likes(name):
         songs=songs,
         artists=artists,
         opinions_map=opinions_map,
-        artist_opinions_map=artist_opinions_map
+        artist_opinions_map=artist_opinions_map,
+        ratings_map=ratings_map,  # repassando ao template
     )
 
 @app.route('/like', methods=['POST'])
