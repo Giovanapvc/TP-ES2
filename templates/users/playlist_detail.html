@@ -1,65 +1,53 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <title>Playlist: {{ playlist['name'] }}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <title>Playlist: {{ playlist.name }}</title>
 </head>
-
 <body>
 
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            <ul class="flashes">
-                {% for message in messages %}
-                    <li>{{ message }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-    {% endwith %}
-    
-    <h1>Playlist: {{ playlist['name'] }}</h1>
-
-    <h2>Músicas na Playlist</h2>
-
-    {% if songs %}
-        <ul>
-            {% for song in songs %}
-                <li>
-                    <strong>{{ song['title'] }}</strong> - {{ song['artist_name'] }}
-                    <form action="{{ url_for('remove_song_from_playlist', playlist_id=playlist['id'], song_id=song['id']) }}" method="post" style="display:inline;">
-                        <button type="submit">Remover</button>
-                    </form>                
-                </li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>Esta playlist está vazia.</p>
+  {# feedback de ações (Adicionar / Remover) #}
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <ul class="flashes">
+        {% for m in messages %}
+          <li>{{ m }}</li>
+        {% endfor %}
+      </ul>
     {% endif %}
+  {% endwith %}
 
-    <hr>
+  <h1>Playlist: {{ playlist.name }}</h1>
 
-    <h2>Adicionar Músicas</h2>
-    <p>Escolha como deseja adicionar músicas:</p>
-
+  <h2>Músicas na playlist</h2>
+  {% if songs %}
     <ul>
+      {% for s in songs %}
         <li>
-            <form action="{{ url_for('user_liked_for_playlist') }}" method="GET">
-                <input type="hidden" name="user" value="{{ user }}">
-                <input type="hidden" name="playlist_id" value="{{ playlist['id'] }}">
-                <button type="submit">A partir das músicas curtidas</button>
-            </form>
+          {{ s.title }} — {{ s.artist_name }}
+          {% if s.link %}
+            | <a href="{{ s.link }}" target="_blank">Ouvir</a>
+          {% endif %}
+          <form action="{{ url_for('remove_song_from_playlist',
+                                   playlist_id=playlist.id,
+                                   song_id=s.id) }}"
+                method="post" style="display:inline;">
+            <button type="submit">Remover</button>
+          </form>
         </li>
-        <li>
-            <form action="{{ url_for('search_by_name') }}" method="post">
-                <input type="hidden" name="user" value="{{ user }}">
-                <input type="hidden" name="playlist_id" value="{{ playlist['id'] }}">
-                <input type="text" name="name" placeholder="Buscar por nome..." required>
-                <button type="submit">Buscar</button>
-        </li>
+      {% endfor %}
     </ul>
-    
-    <br>
-    <a href="{{ url_for('user_playlists', user=playlist['user']) }}">Voltar</a>
+  {% else %}
+    <p>Nenhuma música ainda.</p>
+  {% endif %}
+
+  <hr>
+
+  <a href="{{ url_for('user_playlists', user=user) }}">
+    ← Voltar às minhas playlists
+  </a>
 
 </body>
+</html>

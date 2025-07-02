@@ -11,6 +11,7 @@
   <p><strong>Biografia:</strong> {{ bio }}</p>
 
   <h3>Curtidas no seu perfil: {{ total_artist_likes }}</h3>
+  <h3>Média de estrelas recebidas: {{ avg_artist_rating|round(1) }}</h3>
   {% if artist_likers %}
     <p>Usuários que curtiram você:</p>
     <ul>
