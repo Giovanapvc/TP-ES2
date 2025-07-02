@@ -1,0 +1,12 @@
+<form action="{{ url_for('give_like') }}" method="post" class="inline-block">
+  <input type="hidden" name="user"      value="{{ user }}">
+  <input type="hidden" name="type"      value="{{ type }}">
+  <input type="hidden" name="target_id" value="{{ target_id }}">
+  <button class="px-2 py-1 rounded {{ 'bg-red-100 text-red-700' if liked else 'bg-gray-100' }} text-sm" name="value" value="{{ 0 if liked else 1 }}">
+    {% if liked %}
+      ❤️ Descurtir
+    {% else %}
+      🤍 Curtir
+    {% endif %}
+  </button>
+</form>

@@ -1,30 +1,49 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <title>Minhas Músicas — {{ artist }}</title>
-</head>
-<body>
-  <h1>Minhas Músicas</h1>
-  <a href="{{ url_for('artist_dashboard', name=artist) }}">← Voltar</a>
+{% extends 'base.html' %}
+{% block title %}Minhas Músicas — {{ artist }}{% endblock %}
 
-  {% if songs %}
-  <ul>
-    {% for s in songs %}
-      <li>
-        <strong>{{ s.title }}</strong> — {{ s.genre }}
-        <br>
-        <em>Curtidas por:</em>
-        {% if likers_map[s.id] %}
-          {{ likers_map[s.id] | join(', ') }}
-        {% else %}
-          Ninguém ainda
-        {% endif %}
-      </li>
-    {% endfor %}
-  </ul>
-  {% else %}
-    <p>Você ainda não adicionou nenhuma música.</p>
-  {% endif %}
-</body>
-</html>
+{% block content %}
+  <div class="max-w-4xl mx-auto py-8">
+    <button onclick="history.back()" class="mb-4 px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">
+      ← Voltar
+    </button>
+
+    <h1 class="text-3xl font-bold mb-6">Músicas de {{ artist }}</h1>
+    {% if songs %}
+      <div class="space-y-6">
+        {% for s in songs %}
+          <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex justify-between items-center">
+              <div>
+                <h2 class="text-2xl font-semibold">{{ s.title }}</h2>
+                <p class="text-sm text-gray-500 uppercase">{{ s.genre }}</p>
+              </div>
+              <div class="text-sm text-gray-600">
+                Curtidas por:
+                {% if likers_map[s.id] %}
+                  {{ likers_map[s.id] | join(', ') }}
+                {% else %}
+                  Ninguém
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="mt-4">
+              <h3 class="font-medium">Opiniões</h3>
+              {% if opinions_map[s.id] %}
+                <ul class="mt-2 space-y-1 list-disc list-inside">
+                  {% for op in opinions_map[s.id] %}
+                    <li><strong>{{ op.user }}:</strong> {{ op.text }}</li>
+                  {% endfor %}
+                </ul>
+              {% else %}
+                <p class="text-gray-500 italic mt-1">Sem opiniões ainda.</p>
+              {% endif %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="text-gray-600">Você ainda não adicionou nenhuma música.</p>
+    {% endif %}
+  </div>
+{% endblock %}
