@@ -266,8 +266,15 @@ def most_liked():
     cur.execute("SELECT type, target_id FROM likes WHERE user = ?", (user,))
     liked_items = {(row['type'], row['target_id']) for row in cur.fetchall()}
 
+    cur.execute("SELECT type, target_id, value FROM ratings WHERE user = ?", (user,))
+    ratings = {(row['type'], row['target_id']): row['value'] for row in cur.fetchall()}
+
+    if 'last_rating' in session:
+        last = session['last_rating']
+        ratings[(last['type'], last['target_id'])] = last['value']
+
     conn.close()
-    return render_template('users/search_most_liked.html', songs=songs, artists=artists, user=user, liked_items=liked_items)
+    return render_template('users/search_most_liked.html', songs=songs, artists=artists, user=user, liked_items=liked_items, ratings=ratings)
 
 @app.route('/search/genre', methods=['GET', 'POST'])
 def search_by_genre():
@@ -312,10 +319,17 @@ def search_by_genre():
     cur.execute("SELECT type, target_id FROM likes WHERE user = ?", (user,))
     liked_items = {(row['type'], row['target_id']) for row in cur.fetchall()}
 
+    cur.execute("SELECT type, target_id, value FROM ratings WHERE user = ?", (user,))
+    ratings = {(row['type'], row['target_id']): row['value'] for row in cur.fetchall()}
+
+    if 'last_rating' in session:
+        last = session['last_rating']
+        ratings[(last['type'], last['target_id'])] = last['value']
+
     conn.close()
     return render_template('users/search_by_genre_result.html',
                            songs=songs, artists=artists, genres=genres,
-                           user=user, liked_items=liked_items)
+                           user=user, liked_items=liked_items, ratings=ratings)
 
 @app.route('/search/genre/reset')
 def reset_genre_search():
@@ -325,15 +339,19 @@ def reset_genre_search():
 @app.route('/search/name', methods=['GET', 'POST'])
 def search_by_name():
     session.pop('last_genres', None)
+
     if request.method == 'POST':
         termo = request.form['name']
         user = request.form['user']
+        playlist_id = request.form.get('playlist_id')
         session['last_search'] = termo
         session['last_user'] = user
+        session['last_playlist_id'] = playlist_id
 
     else:
         termo = session.get('last_search')
         user = session.get('last_user')
+        playlist_id = session.get('last_playlist_id')
 
     if not termo or not user:
         return render_template('users/search_by_name_form.html')
@@ -350,14 +368,173 @@ def search_by_name():
     """, ('%' + termo + '%',))
     songs = cur.fetchall()
 
-    cur.execute("SELECT * FROM artists WHERE name LIKE ?", ('%' + termo + '%',))
-    artists = cur.fetchall()
+    if not playlist_id:
+        cur.execute("SELECT * FROM artists WHERE name LIKE ?", ('%' + termo + '%',))
+        artists = cur.fetchall()
+    else:
+        artists = []
 
     cur.execute("SELECT type, target_id FROM likes WHERE user = ?", (user,))
     liked_items = {(row['type'], row['target_id']) for row in cur.fetchall()}
 
+    cur.execute("SELECT type, target_id, value FROM ratings WHERE user = ?", (user,))
+    ratings = {(row['type'], row['target_id']): row['value'] for row in cur.fetchall()}
+
+    cur.execute("SELECT song_id FROM playlist_songs WHERE playlist_id = ?", (playlist_id,))
+    songs_in_playlist = {row['song_id'] for row in cur.fetchall()}
+
+    if 'last_rating' in session:
+        last = session['last_rating']
+        ratings[(last['type'], last['target_id'])] = last['value']
+
     conn.close()
-    return render_template('users/search_by_name_results.html', songs=songs, artists=artists, termo=termo, user=user, liked_items=liked_items)
+    return render_template('users/search_by_name_results.html', songs=songs, artists=artists, termo=termo, user=user, liked_items=liked_items, ratings=ratings, playlist_id=playlist_id, songs_in_playlist=songs_in_playlist)
+
+@app.route('/rate', methods=['POST'])
+def give_rating():
+    user = request.form['user']
+    type_ = request.form['type']
+    target_id = int(request.form['target_id'])
+    value = int(request.form['value'])
+
+    conn = connect_db()
+    cur = conn.cursor()
+    cur.execute("""
+        INSERT INTO ratings (user, type, target_id, value)
+        VALUES (?, ?, ?, ?)
+        ON CONFLICT(user, type, target_id) DO UPDATE SET value=excluded.value
+    """, (user, type_, target_id, value))
+    conn.commit()
+    conn.close()
+
+    session['last_rating'] = {
+        'user': user,
+        'type': type_,
+        'target_id': target_id,
+        'value': value
+    }
+
+    flash('Avaliação registrada!')
+    return redirect(request.referrer)
+
+@app.route('/playlists')
+def user_playlists():
+    user = request.args.get('user')
+
+    conn = connect_db()
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM playlists WHERE user = ?", (user,))
+    playlists = cur.fetchall()
+    conn.close()
+
+    return render_template('users/playlists.html', playlists=playlists, user=user)
+
+@app.route('/playlist/create', methods=['POST'])
+def create_playlist():
+    user = request.form['user']
+    name = request.form['name']
+
+    conn = connect_db()
+    cur = conn.cursor()
+    cur.execute("INSERT INTO playlists (user, name) VALUES (?, ?)", (user, name))
+    conn.commit()
+    conn.close()
+
+    flash('Playlist criada!')
+
+    return redirect(request.referrer)
+
+@app.route('/playlist/<int:playlist_id>')
+def view_playlist(playlist_id):
+    conn = connect_db()
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+
+    cur.execute("SELECT * FROM playlists WHERE id = ?", (playlist_id,))
+    playlist = cur.fetchone()
+
+    cur.execute("""
+        SELECT songs.*, artists.name AS artist_name
+        FROM playlist_songs
+        JOIN songs ON playlist_songs.song_id = songs.id
+        JOIN artists ON songs.artist_id = artists.id
+        WHERE playlist_songs.playlist_id = ?
+    """, (playlist_id,))
+    songs = cur.fetchall()
+
+    cur.execute("SELECT song_id FROM playlist_songs WHERE playlist_id = ?", (playlist_id,))
+    songs_in_playlist = {row['song_id'] for row in cur.fetchall()}
+
+    conn.close()
+
+    return render_template('users/playlist_detail.html', playlist=playlist, songs=songs, user=playlist['user'], songs_in_playlist=songs_in_playlist)
+
+@app.route('/playlist/<int:playlist_id>/add/<int:song_id>')
+def add_song_to_playlist(playlist_id, song_id):
+    conn = connect_db()
+    cur = conn.cursor()
+    cur.execute("INSERT OR IGNORE INTO playlist_songs (playlist_id, song_id) VALUES (?, ?)", (playlist_id, song_id))
+    conn.commit()
+    conn.close()
+
+    flash('Música adicionada à playlist!')
+
+    return redirect(request.referrer)
+
+@app.route('/playlist/<int:playlist_id>/remove/<int:song_id>', methods=['POST'])
+def remove_song_from_playlist(playlist_id, song_id):
+    conn = connect_db()
+    cur = conn.cursor()
+    cur.execute("DELETE FROM playlist_songs WHERE playlist_id = ? AND song_id = ?", (playlist_id, song_id))
+    conn.commit()
+    conn.close()
+
+    flash('Música removida da playlist!')
+
+    return redirect(url_for('view_playlist', playlist_id=playlist_id))
+
+@app.route('/user/liked/for_playlist')
+def user_liked_for_playlist():
+    user = request.args.get('user')
+    playlist_id = request.args.get('playlist_id')
+    conn = connect_db()
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT songs.*, artists.name AS artist_name
+        FROM likes
+        JOIN songs ON songs.id = likes.target_id
+        JOIN artists ON songs.artist_id = artists.id
+        WHERE likes.user = ? AND likes.type = 'song' AND likes.value = 1
+    """, (user,))
+    songs = cur.fetchall()
+
+    cur.execute("SELECT song_id FROM playlist_songs WHERE playlist_id = ?", (playlist_id,))
+    songs_in_playlist = {row['song_id'] for row in cur.fetchall()}
+
+    conn.close()
+    return render_template('users/add_from_liked.html',
+                           songs=songs,
+                           user=user,
+                           playlist_id=playlist_id, songs_in_playlist=songs_in_playlist)
+
+@app.route('/playlist/<int:playlist_id>/delete', methods=['POST'])
+def delete_playlist(playlist_id):
+    user = request.form['user']
+    conn = connect_db()
+    cur = conn.cursor()
+
+    cur.execute("DELETE FROM playlist_songs WHERE playlist_id = ?", (playlist_id,))
+
+    cur.execute("DELETE FROM playlists WHERE id = ?", (playlist_id,))
+    conn.commit()
+    conn.close()
+
+    flash('Playlist removida com sucesso!')
+    return redirect(url_for('user_playlists', user=user))
+
 
 if __name__ == '__main__':
     app.run(debug=True)

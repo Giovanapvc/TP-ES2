@@ -39,6 +39,22 @@
                                     {{ 'Descurtir' if ('song', song['id']) in liked_items else 'Curtir' }}
                                 </button>
                             </form>
+
+                            <form method="POST" action="{{ url_for('give_rating') }}" style="display:inline;">
+                                <input type="hidden" name="user" value="{{ user }}">
+                                <input type="hidden" name="type" value="song">
+                                <input type="hidden" name="target_id" value="{{ song['id'] }}">
+                                {% for i in range(1, 6) %}
+                                    <button type="submit" name="value" value="{{ i }}">
+                                        {% if ratings.get(('song', song['id']), 0) >= i %}
+                                            ★
+                                        {% else %}
+                                            ☆
+                                        {% endif %}
+                                    </button>
+                                {% endfor %}
+                            </form>
+
                         </li>
                     {% endfor %}
                 </ul>
@@ -63,6 +79,22 @@
                                     {{ 'Descurtir' if ('artist', artist['id']) in liked_items else 'Curtir' }}
                                 </button>
                             </form>
+
+                            <form method="POST" action="{{ url_for('give_rating') }}" style="display:inline;">
+                                <input type="hidden" name="user" value="{{ user }}">
+                                <input type="hidden" name="type" value="artist">
+                                <input type="hidden" name="target_id" value="{{ artist['id'] }}">
+                                {% for i in range(1, 6) %}
+                                    <button type="submit" name="value" value="{{ i }}">
+                                        {% if ratings.get(('artist', artist['id']), 0) >= i %}
+                                            ★
+                                        {% else %}
+                                            ☆
+                                        {% endif %}
+                                    </button>
+                                {% endfor %}
+                            </form>
+
                         </li>
                     {% endfor %}
                 </ul>

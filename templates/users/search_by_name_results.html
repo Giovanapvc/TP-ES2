@@ -36,6 +36,32 @@
                         {{ 'Descurtir' if ('song', song['id']) in liked_items else 'Curtir' }}
                     </button>
                 </form>
+
+                <form action="{{ url_for('give_rating') }}" method="post" style="display: inline;">
+                    <input type="hidden" name="user" value="{{ user }}">
+                    <input type="hidden" name="type" value="song">
+                    <input type="hidden" name="target_id" value="{{ song['id'] }}">
+                    {% for i in range(1, 6) %}
+                        <button type="submit" name="value" value="{{ i }}">
+                            {% if ratings.get(('song', song['id']), 0) >= i %}
+                                ★
+                            {% else %}
+                                ☆
+                            {% endif %}
+                        </button>
+                    {% endfor %}
+                </form>
+
+                {% if playlist_id %}
+                    {% if song['id'] in songs_in_playlist %}
+                        <span>Já está na playlist</span>
+                    {% else %}
+                        <form action="{{ url_for('add_song_to_playlist', playlist_id=playlist_id, song_id=song['id']) }}" method="get">
+                            <button type="submit">Adicionar à Playlist</button>
+                        </form>
+                    {% endif %}
+                {% endif %}
+
             </li>
             {% endfor %}
         </ul>
@@ -44,31 +70,47 @@
         {% endif %}
     </section>
         
-    <section>
+    {% if not playlist_id %}    
+        <section>
 
-        
-        <h2>Artistas Encontrados</h2>
-        {% if artists %}
-        <ul>
-            {% for artist in artists %}
-            <li>
-                <strong>{{ artist['name'] }}</strong>
-                <form action="{{ url_for('give_like') }}" method="POST" style="display:inline;">
-                    <input type="hidden" name="user" value="{{ user }}">
-                    <input type="hidden" name="type" value="artist">
-                    <input type="hidden" name="target_id" value="{{ artist['id'] }}">
-                    <input type="hidden" name="value" value="{{ 0 if ('artist', artist['id']) in liked_items else 1 }}">
-                    <button type="submit">
-                        {{ 'Descurtir' if ('artist', artist['id']) in liked_items else 'Curtir' }}
-                    </button>
-                </form>
-            </li>
-            {% endfor %}
-        </ul>
-        {% else %}
-        <p>Nenhum artista encontrado.</p>
-        {% endif %}
-    </section>
+            <h2>Artistas Encontrados</h2>
+            {% if artists %}
+            <ul>
+                {% for artist in artists %}
+                <li>
+                    <strong>{{ artist['name'] }}</strong>
+                    <form action="{{ url_for('give_like') }}" method="POST" style="display:inline;">
+                        <input type="hidden" name="user" value="{{ user }}">
+                        <input type="hidden" name="type" value="artist">
+                        <input type="hidden" name="target_id" value="{{ artist['id'] }}">
+                        <input type="hidden" name="value" value="{{ 0 if ('artist', artist['id']) in liked_items else 1 }}">
+                        <button type="submit">
+                            {{ 'Descurtir' if ('artist', artist['id']) in liked_items else 'Curtir' }}
+                        </button>
+                    </form>
+                    
+                    <form action="{{ url_for('give_rating') }}" method="POST" style="display:inline;">
+                        <input type="hidden" name="user" value="{{ user }}">
+                        <input type="hidden" name="type" value="artist">
+                        <input type="hidden" name="target_id" value="{{ artist['id'] }}">
+                        {% for i in range(1, 5 + 1) %}
+                        <button type="submit" name="value" value="{{ i }}">
+                            {% if ratings.get(('artist', artist['id']), 0) >= i %}
+                            ★
+                            {% else %}
+                            ☆
+                            {% endif %}
+                        </button>
+                        {% endfor %}
+                    </form>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p>Nenhum artista encontrado.</p>
+            {% endif %}
+        </section>
+    {% endif %}
 
     <a href="{{ url_for('user_dashboard', name=user) }}">Voltar ao Painel</a>
 
