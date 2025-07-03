@@ -36,4 +36,40 @@ ul {
     margin-left: 0;
 }
 
-body { font-family: 'Inter', sans-serif; }
+body { 
+    font-family: 'Inter', sans-serif;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f5f6f8; 
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 40px;
+}
+
+th {
+  text-align: center;
+  padding: 12px 15px;
+  background-color: #e2e3e5;
+}
+
+td {
+  padding: 12px 15px;
+  vertical-align: top;
+}
+
+td form {
+  display: inline-block;
+  margin-top: 4px;
+}
+
+textarea {
+  width: 100%;
+  min-height: 50px;
+  resize: vertical;
+  padding: 6px;
+  font-size: 14px;
+}
