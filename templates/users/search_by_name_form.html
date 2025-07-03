@@ -1,40 +1,28 @@
 {% extends "base.html" %}
-{% block title %}Buscar por Nome – IndieFriends{% endblock %}
+{% block title %}Buscar por Nome{% endblock %}
 
 {% block content %}
-  <div class="flex items-center justify-between mb-6">
-    <h2 class="text-2xl font-semibold">Buscar por Nome</h2>
-    {% if session.get('user') %}
-      {# Se estiver logado, volta ao dashboard do usuário #}
-      <a href="{{ url_for('user_dashboard', name=session.get('user')) }}" class="text-indigo-600 hover:underline">
-        ← Voltar
-      </a>
-    {% else %}
-      {# Se não, volta à tela inicial de usuário #}
-      <a href="{{ url_for('user_initial_screen') }}" class="text-indigo-600 hover:underline">
-        ← Voltar
-      </a>
-    {% endif %}
+<h2 class="text-xl font-semibold mb-4">Buscar música / artista</h2>
+
+<form action="{{ url_for('search_by_name') }}" method="post" class="space-y-4">
+  <input type="hidden" name="user" value="{{ session.get('user') }}">
+  {% if playlist_id %}
+    <!-- manter referência da playlist durante o POST -->
+    <input type="hidden" name="playlist_id" value="{{ playlist_id }}">
+  {% endif %}
+  <div>
+    <label class="block font-medium">Nome:</label>
+    <input name="name" required
+           class="w-full p-2 border rounded" placeholder="digite parte do título...">
   </div>
+  <button class="bg-indigo-600 text-white px-4 py-2 rounded shadow hover:bg-indigo-700">
+    Buscar
+  </button>
+</form>
 
-  <form method="post" class="space-y-4">
-    <input
-      type="text"
-      name="name"
-      placeholder="Título ou artista"
-      class="w-full p-2 border rounded"
-      required
-    />
-    {% if session.get('user') %}
-      {# só incluímos o hidden quando sabemos quem está buscando #}
-      <input type="hidden" name="user" value="{{ session.get('user') }}"/>
-    {% endif %}
-
-    <button
-      type="submit"
-      class="px-6 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
-    >
-      Buscar
-    </button>
-  </form>
+{% if playlist_id %}
+  <p class="mt-4 text-sm text-gray-600">
+    Resultado será mostrado com opção de adicionar à playlist atual.
+  </p>
+{% endif %}
 {% endblock %}

@@ -1,44 +1,74 @@
 {% extends "base.html" %}
-{% block title %}Resultados da Busca – {{ user }}{% endblock %}
+{% block title %}Resultados – IndieFriends{% endblock %}
 
 {% block content %}
-  <div class="flex items-center justify-between mb-6">
-    <h2 class="text-2xl font-semibold">Resultados para “{{ termo }}”</h2>
-    {# Volta para o painel do usuário logado #}
-    <a href="{{ url_for('user_dashboard', name=user) }}"
-       class="text-indigo-600 hover:underline">
-      ← Voltar
-    </a>
-  </div>
+<h2 class="text-xl font-semibold mb-4">
+  Resultados para “{{ termo }}”
+</h2>
 
-  {# Aqui viria a lista/tabela de resultados, por exemplo: #}
-  <ul class="space-y-4">
+<!-- Link voltar / nova busca -->
+<div class="mb-6 space-x-4">
+  <a href="{{ url_for('user_dashboard', name=user) }}"
+     class="text-indigo-600 hover:underline">← Voltar ao painel</a>
+
+  <!-- força reset da sessão de busca -->
+  <a href="{{ url_for('search_by_name') }}?reset=1"
+     class="text-indigo-600 hover:underline">🔍 Nova busca</a>
+</div>
+
+{% if songs %}
+<table class="min-w-full bg-white rounded-lg overflow-hidden shadow">
+  <thead class="bg-gray-200 text-gray-600">
+    <tr>
+      <th class="p-3">Título</th>
+      <th class="p-3">Artista</th>
+      <th class="p-3">Likes</th>
+      <th class="p-3">★</th>
+      {% if playlist_id %}<th class="p-3">Ações</th>{% endif %}
+    </tr>
+  </thead>
+  <tbody>
     {% for s in songs %}
-      <li class="bg-white p-4 rounded shadow">
-        <div class="flex justify-between items-center">
-          <div>
-            <strong>{{ s.title }}</strong> — {{ s.artist_name }}
-          </div>
-          {% if s.link %}
-            <a href="{{ s.link }}" target="_blank"
-               class="text-indigo-600 hover:underline">
-              Ouvir
-            </a>
-          {% endif %}
-        </div>
-        {# avaliações, curtidas, etc. #}
-      </li>
-    {% endfor %}
+    <tr class="border-t odd:bg-gray-50">
+      <td class="p-3">{{ s.title }}</td>
+      <td class="p-3">{{ s.artist_name }}</td>
+      <td class="p-3">{{ likers_map.get(('song', s.id), [])|length }}</td>
+      <td class="p-3">
+        {{ ratings.get(('song', s.id), 0) or '—' }}
+      </td>
 
-    {% for a in artists %}
-      <li class="bg-white p-4 rounded shadow">
-        <div class="flex justify-between items-center">
-          <div>
-            <strong>{{ a.name }}</strong>
-          </div>
-        </div>
-        {# opiniões, botões, etc. #}
-      </li>
+      {# --- NOVA COLUNA para playlist -------------------------------- #}
+      {% if playlist_id %}
+      <td class="p-3">
+        {% if s.id in songs_in_playlist %}
+          <span class="text-gray-400">Já na playlist</span>
+        {% else %}
+          <a href="{{ url_for('add_song_to_playlist',
+                              playlist_id=playlist_id, song_id=s.id) }}"
+             class="bg-indigo-500 text-white px-2 py-1 rounded text-sm">
+             ➕ Adicionar
+          </a>
+        {% endif %}
+      </td>
+      {% endif %}
+      {# ---------------------------------------------------------------- #}
+    </tr>
     {% endfor %}
-  </ul>
+  </tbody>
+</table>
+{% else %}
+  <p class="text-gray-600">Nenhuma música encontrada.</p>
+{% endif %}
+
+{% if artists %}
+<h3 class="text-lg font-semibold mt-10 mb-2">Artistas</h3>
+<ul class="list-disc pl-6">
+  {% for a in artists %}
+    <li class="mb-1">
+      <a href="{{ url_for('artist_dashboard', name=a.name) }}"
+         class="text-indigo-600 hover:underline">{{ a.name }}</a>
+    </li>
+  {% endfor %}
+</ul>
+{% endif %}
 {% endblock %}

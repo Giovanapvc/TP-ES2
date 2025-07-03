@@ -492,28 +492,36 @@ def reset_genre_search():
 
 @app.route('/search/name', methods=['GET','POST'])
 def search_by_name():
-    # sempre limpa busca de gêneros
+    # Limpamos busca por gênero sempre
     session.pop('last_genres', None)
 
+    # GET: nova busca — zera histórico e mostra o form limpo
     if request.method == 'GET':
-        # ao entrar pela URL (sem enviar o form), resetamos a busca anterior
+        # guarda apenas o contexto (user / playlist)
+        user = request.args.get('user')
+        playlist_id = request.args.get('playlist_id')
+        # limpa o histórico
         session.pop('last_search', None)
         session.pop('last_user', None)
         session.pop('last_playlist_id', None)
-        return render_template('users/search_by_name_form.html')
+        return render_template(
+            'users/search_by_name_form.html',
+            user=user,
+            playlist_id=playlist_id
+        )
 
-    # === POST: usuário submeteu o formulário de busca ===
-    termo       = request.form['name']
-    user        = request.form['user']
+    # POST: submeteu termos de busca
+    termo       = request.form.get('name', '').strip()
+    user        = request.form.get('user')
     playlist_id = request.form.get('playlist_id')
 
-    # guardamos na sessão para poder usar ao renderizar resultados
+    # salva em sessão para paginações
     session['last_search']      = termo
     session['last_user']        = user
     session['last_playlist_id'] = playlist_id
 
+    # executa a busca
     conn = get_conn(); cur = conn.cursor()
-    # busca músicas
     cur.execute("""
         SELECT s.*, a.name AS artist_name
           FROM songs s
@@ -522,39 +530,54 @@ def search_by_name():
     """, ('%'+termo+'%',))
     songs = cur.fetchall()
 
-    # se não for adicionar em playlist, busca artistas
+    # busca artistas só fora de playlist
     if not playlist_id:
         cur.execute("SELECT * FROM artists WHERE name LIKE ?", ('%'+termo+'%',))
         artists = cur.fetchall()
     else:
         artists = []
 
-    # curtidas do usuário
+    # quem já curtiu cada música
+    likers_map = {}
+    for s in songs:
+        cur.execute(
+            "SELECT user FROM likes WHERE type='song' AND target_id=? AND value=1",
+            (s['id'],)
+        )
+        likers_map[('song', s['id'])] = [r['user'] for r in cur.fetchall()]
+
+    # itens curtidos pelo user
     cur.execute("SELECT type, target_id FROM likes WHERE user = ?", (user,))
     liked_items = {(r['type'], r['target_id']) for r in cur.fetchall()}
 
-    # opiniões
+    # opiniões sobre músicas e artistas
     opinions_map = {}
-    artist_opinions_map = {}
     for s in songs:
         cur.execute("SELECT user, text FROM opinions WHERE type='song' AND target_id = ?", (s['id'],))
         opinions_map[s['id']] = cur.fetchall()
+
+    artist_opinions_map = {}
     for a in artists:
         cur.execute("SELECT user, text FROM opinions WHERE type='artist' AND target_id = ?", (a['id'],))
         artist_opinions_map[a['id']] = cur.fetchall()
 
-    # avaliações do usuário nesta busca
+    # ratings do user
     cur.execute("SELECT type, target_id, value FROM ratings WHERE user = ?", (user,))
     ratings = {(r['type'], r['target_id']): r['value'] for r in cur.fetchall()}
-    if 'last_rating' in session:
-        lr = session['last_rating']
-        ratings[(lr['type'], lr['target_id'])] = lr['value']
 
-    # músicas já na playlist (se houver)
-    cur.execute("SELECT song_id FROM playlist_songs WHERE playlist_id = ?", (playlist_id,))
-    songs_in_playlist = {r['song_id'] for r in cur.fetchall()}
+    # músicas já na playlist atual
+    songs_in_playlist = set()
+    if playlist_id:
+        cur.execute("SELECT song_id FROM playlist_songs WHERE playlist_id = ?", (playlist_id,))
+        songs_in_playlist = {r['song_id'] for r in cur.fetchall()}
 
     conn.close()
+
+    # botão voltar aponta ao lugar certo
+    if playlist_id:
+        back_url = url_for('view_playlist', playlist_id=playlist_id)
+    else:
+        back_url = url_for('user_dashboard', name=user)
 
     return render_template(
         'users/search_by_name_results.html',
@@ -567,8 +590,11 @@ def search_by_name():
         artist_opinions_map=artist_opinions_map,
         ratings=ratings,
         playlist_id=playlist_id,
-        songs_in_playlist=songs_in_playlist
+        songs_in_playlist=songs_in_playlist,
+        likers_map=likers_map,
+        back_url=back_url
     )
+
 
 
 @app.route('/rate', methods=['POST'])
