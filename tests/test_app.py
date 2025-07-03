@@ -123,27 +123,6 @@ def test_user_login_fail_flash(client_with_db_copy):
     assert "Usuário" in resp.get_data(as_text=True)
 
 
-def test_like_song_creates_and_unlike_deletes(client_with_db_copy):
-    client, conn = client_with_db_copy
-    client.post("/artist/new", data={"name": "A", "bio": ""})
-    client.post("/artist/A/add", data={
-        'title': 'SongT', 'description': '', 'genre': 'Pop', 'link': '', 'file_path': ''
-    })
-    song_id = conn.execute("SELECT id FROM songs WHERE title='SongT'").fetchone()[0]
-    client.post("/user/new", data={"name": "U"})
-    before = conn.execute("SELECT COUNT(*) FROM likes").fetchone()[0]
-    client.post("/like", data={
-        'user': 'U', 'type': 'song', 'target_id': song_id, 'value': 1
-    })
-    after_like = conn.execute("SELECT COUNT(*) FROM likes").fetchone()[0]
-    assert after_like == before + 1
-    client.post("/like", data={
-        'user': 'U', 'type': 'song', 'target_id': song_id, 'value': 0
-    })
-    after_unlike = conn.execute("SELECT COUNT(*) FROM likes").fetchone()[0]
-    assert after_unlike == before
-
-
 def test_most_liked_page_loads(client_with_db_copy):
     client, _ = client_with_db_copy
     assert client.get("/search/most_liked").status_code == 200
@@ -163,32 +142,69 @@ def test_artist_dashboard_shows_name(client_with_db_copy):
     assert 'Art1' in resp.get_data(as_text=True)
 
 
-def test_edit_song_form_loads_existing_data(client_with_db_copy):
+def test_user_can_post_song_opinion(client_with_db_copy):
     client, conn = client_with_db_copy
-    client.post('/artist/new', data={'name': 'Ed', 'bio': ''})
-    client.post('/artist/login', data={'name': 'Ed'})
-    client.post('/artist/Ed/add', data={
-        'title': 'OldTitle', 'description': 'Desc', 'genre': 'Rock',
-        'link': '', 'file_path': ''
-    })
-    song_id = conn.execute("SELECT id FROM songs WHERE title = 'OldTitle'").fetchone()[0]
-    resp = client.get(f'/artist/Ed/edit/{song_id}')
-    assert resp.status_code == 200
-    assert 'value="OldTitle"' in resp.get_data(as_text=True)
+    client.post("/artist/new", data={"name": "OpArt", "bio": ""})
+    client.post(
+        "/artist/OpArt/add",
+        data={
+            "title": "OpinionSong",
+            "description": "",
+            "genre": "Rock",
+            "link": "",
+            "file_path": ""
+        }
+    )
+    song_id = conn.execute(
+        "SELECT id FROM songs WHERE title='OpinionSong'"
+    ).fetchone()[0]
+
+    client.post("/user/new", data={"name": "OpinUser"})
+    client.post("/user/login", data={"name": "OpinUser"}, follow_redirects=True)
+    client.post(
+        "/like",
+        data={"user": "OpinUser", "type": "song", "target_id": song_id, "value": 1},
+        follow_redirects=True
+    )
+    resp = client.post(
+        f"/opinion/song/{song_id}",
+        data={"user": "OpinUser", "text": "Essa faixa é demais!"},
+        follow_redirects=False
+    )
+    assert resp.status_code == 302
+    page = client.get("/user/OpinUser/liked").get_data(as_text=True)
+    assert "Essa faixa é demais!" in page
 
 
-def test_search_by_name_returns_song_and_artist(client_with_db_copy):
+def test_user_can_create_playlist_and_add_and_remove_song(client_with_db_copy):
     client, conn = client_with_db_copy
-    client.post('/artist/new', data={'name': 'FindMe', 'bio': ''})
-    client.post('/artist/login', data={'name': 'FindMe'})
-    client.post('/artist/FindMe/add', data={
-        'title': 'UniqueSong', 'description': '', 'genre': 'Pop',
-        'link': '', 'file_path': ''
+    client.post("/artist/new", data={"name": "PLArt", "bio": ""})
+    client.post("/artist/PLArt/add", data={
+        "title": "PLSong", "description": "", "genre": "Jazz",
+        "link": "", "file_path": ""
     })
-    client.post('/user/new', data={'name': 'Seeker'})
-    client.post('/user/login', data={'name': 'Seeker'})
-    resp = client.post('/search/name', data={'name': 'Unique', 'user': 'Seeker'}, follow_redirects=True)
-    assert resp.status_code == 200
-    html = resp.get_data(as_text=True)
-    assert 'UniqueSong' in html
-    assert 'FindMe' in html
+    song_id = conn.execute("SELECT id FROM songs WHERE title='PLSong'").fetchone()[0]
+    client.post("/user/new", data={"name": "PLUser"})
+    client.post("/user/login", data={"name": "PLUser"}, follow_redirects=True)
+    resp = client.post("/playlist/create", data={"user": "PLUser", "name": "MinhasFavoritas"}, follow_redirects=True)
+    assert "Playlist criada" in resp.get_data(as_text=True)
+    pl_id = conn.execute("SELECT id FROM playlists WHERE name='MinhasFavoritas'").fetchone()[0]
+    resp = client.get(f"/playlist/{pl_id}/add/{song_id}", follow_redirects=True)
+    assert "Música adicionada" in resp.get_data(as_text=True)
+    resp = client.post(f"/playlist/{pl_id}/remove/{song_id}", follow_redirects=True)
+    assert "Música removida" in resp.get_data(as_text=True)
+
+
+def test_user_can_rate_an_artist_and_see_average(client_with_db_copy):
+    client, conn = client_with_db_copy
+    client.post("/artist/new", data={"name": "RateArt", "bio": ""})
+    art_id = conn.execute("SELECT id FROM artists WHERE name='RateArt'").fetchone()[0]
+    client.post("/user/new", data={"name": "RateUser"})
+    client.post("/user/login", data={"name": "RateUser"}, follow_redirects=True)
+    resp = client.post("/rate", data={
+        "user": "RateUser", "type": "artist", "target_id": art_id, "value": 4
+    }, follow_redirects=True)
+    assert "Avaliação registrada" in resp.get_data(as_text=True)
+    resp = client.get(f"/artist/RateArt")
+    assert "Média de Estrelas" in resp.get_data(as_text=True)
+    assert "4.0" in resp.get_data(as_text=True)

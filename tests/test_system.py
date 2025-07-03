@@ -5,25 +5,20 @@ import uuid
 import shutil
 import pytest
 
-# 1) carregue o módulo todo
-import app as app_module          # <-- módulo, contém connect_db()
-flask_app = app_module.app        # <-- instância Flask que vamos testar
+import app as app_module          
+flask_app = app_module.app    
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 @pytest.fixture
 def client_and_db(tmp_path, monkeypatch):
-    # banco temporário
     orig = ROOT / "data.db"
     temp_db = tmp_path / f"sys_{uuid.uuid4().hex}.db"
     shutil.copy(orig, temp_db)
 
-    # 2) monkey-patch em app_module.connect_db  (não em flask_app)
     monkeypatch.setattr(app_module, 'connect_db',
                         lambda: sqlite3.connect(str(temp_db)))
-
-    # 3) configurações de teste
     flask_app.config['TESTING'] = True
     flask_app.secret_key = 'sys-test'
 
