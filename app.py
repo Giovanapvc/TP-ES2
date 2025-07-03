@@ -192,7 +192,6 @@ def list_songs(name):
         avg_ratings=avg_ratings
     )
 
-
 @app.route('/artist/<name>/edit/<int:id>', methods=['GET', 'POST'])
 def edit_songs(name, id):
     conn = get_conn(); cur = conn.cursor()
@@ -575,8 +574,6 @@ def search_by_name():
         back_url=back_url
     )
 
-
-
 @app.route('/rate', methods=['POST'])
 def give_rating():
     user      = request.form['user']
@@ -655,7 +652,6 @@ def add_song_to_playlist(playlist_id, song_id):
 
     dest = request.referrer or url_for('view_playlist', playlist_id=playlist_id)
     return redirect(dest)
-
 
 @app.route('/playlist/<int:playlist_id>/remove/<int:song_id>', methods=['POST'])
 def remove_song_from_playlist(playlist_id, song_id):
