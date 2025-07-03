@@ -37,7 +37,7 @@
         {{ ratings.get(('song', s.id), 0) or '—' }}
       </td>
 
-      {# --- NOVA COLUNA para playlist -------------------------------- #}
+
       {% if playlist_id %}
       <td class="p-3">
         {% if s.id in songs_in_playlist %}
@@ -51,7 +51,6 @@
         {% endif %}
       </td>
       {% endif %}
-      {# ---------------------------------------------------------------- #}
     </tr>
     {% endfor %}
   </tbody>

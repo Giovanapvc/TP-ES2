@@ -22,7 +22,6 @@ def index():
 def song_detail(song_id):
     return redirect(url_for('index'))
 
-# ========== ARTIST FLOW ==========
 
 @app.route('/artist')
 def artist_initial_screen():
@@ -224,7 +223,6 @@ def edit_songs(name, id):
         return "Música não encontrada", 404
     return render_template('artists/edit_songs.html', artist=name, song=song)
 
-# ========== USER FLOW ==========
 
 @app.route('/user')
 def user_initial_screen():
@@ -303,7 +301,7 @@ def all_likes(name):
         artists=artists,
         opinions_map=opinions_map,
         artist_opinions_map=artist_opinions_map,
-        ratings_map=ratings_map,  # repassando ao template
+        ratings_map=ratings_map,  
     )
 
 @app.route('/like', methods=['POST'])
@@ -356,7 +354,6 @@ def opinion_artist(artist_id):
     conn.commit(); conn.close()
     return redirect(request.referrer or url_for('user_dashboard', name=request.form['user']))
 
-# ========== SEARCH ==========
 
 @app.route('/search/most_liked')
 def most_liked():
@@ -492,15 +489,11 @@ def reset_genre_search():
 
 @app.route('/search/name', methods=['GET','POST'])
 def search_by_name():
-    # Limpamos busca por gênero sempre
     session.pop('last_genres', None)
 
-    # GET: nova busca — zera histórico e mostra o form limpo
     if request.method == 'GET':
-        # guarda apenas o contexto (user / playlist)
         user = request.args.get('user')
         playlist_id = request.args.get('playlist_id')
-        # limpa o histórico
         session.pop('last_search', None)
         session.pop('last_user', None)
         session.pop('last_playlist_id', None)
@@ -509,18 +502,14 @@ def search_by_name():
             user=user,
             playlist_id=playlist_id
         )
-
-    # POST: submeteu termos de busca
     termo       = request.form.get('name', '').strip()
     user        = request.form.get('user')
     playlist_id = request.form.get('playlist_id')
 
-    # salva em sessão para paginações
     session['last_search']      = termo
     session['last_user']        = user
     session['last_playlist_id'] = playlist_id
 
-    # executa a busca
     conn = get_conn(); cur = conn.cursor()
     cur.execute("""
         SELECT s.*, a.name AS artist_name
@@ -530,14 +519,11 @@ def search_by_name():
     """, ('%'+termo+'%',))
     songs = cur.fetchall()
 
-    # busca artistas só fora de playlist
     if not playlist_id:
         cur.execute("SELECT * FROM artists WHERE name LIKE ?", ('%'+termo+'%',))
         artists = cur.fetchall()
     else:
         artists = []
-
-    # quem já curtiu cada música
     likers_map = {}
     for s in songs:
         cur.execute(
@@ -545,12 +531,8 @@ def search_by_name():
             (s['id'],)
         )
         likers_map[('song', s['id'])] = [r['user'] for r in cur.fetchall()]
-
-    # itens curtidos pelo user
     cur.execute("SELECT type, target_id FROM likes WHERE user = ?", (user,))
     liked_items = {(r['type'], r['target_id']) for r in cur.fetchall()}
-
-    # opiniões sobre músicas e artistas
     opinions_map = {}
     for s in songs:
         cur.execute("SELECT user, text FROM opinions WHERE type='song' AND target_id = ?", (s['id'],))
@@ -561,11 +543,10 @@ def search_by_name():
         cur.execute("SELECT user, text FROM opinions WHERE type='artist' AND target_id = ?", (a['id'],))
         artist_opinions_map[a['id']] = cur.fetchall()
 
-    # ratings do user
+
     cur.execute("SELECT type, target_id, value FROM ratings WHERE user = ?", (user,))
     ratings = {(r['type'], r['target_id']): r['value'] for r in cur.fetchall()}
 
-    # músicas já na playlist atual
     songs_in_playlist = set()
     if playlist_id:
         cur.execute("SELECT song_id FROM playlist_songs WHERE playlist_id = ?", (playlist_id,))
@@ -573,7 +554,6 @@ def search_by_name():
 
     conn.close()
 
-    # botão voltar aponta ao lugar certo
     if playlist_id:
         back_url = url_for('view_playlist', playlist_id=playlist_id)
     else:
@@ -612,8 +592,6 @@ def give_rating():
     conn.commit(); conn.close()
     session['last_rating'] = dict(user=user, type=type_, target_id=target_id, value=value)
     flash('Avaliação registrada!')
-
-    # Volta para a página anterior se houver, senão para o painel do usuário
     dest = request.referrer or url_for('user_dashboard', name=user)
     return redirect(dest)
 
@@ -641,7 +619,6 @@ def create_playlist():
     conn.close()
 
     flash('Playlist criada!')
-    # redireciona sempre para /playlists?user=<user>
     return redirect(url_for('user_playlists', user=user))
 
 @app.route('/playlist/<int:playlist_id>')

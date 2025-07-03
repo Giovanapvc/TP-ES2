@@ -7,7 +7,6 @@
 <form action="{{ url_for('search_by_name') }}" method="post" class="space-y-4">
   <input type="hidden" name="user" value="{{ session.get('user') }}">
   {% if playlist_id %}
-    <!-- manter referência da playlist durante o POST -->
     <input type="hidden" name="playlist_id" value="{{ playlist_id }}">
   {% endif %}
   <div>
