@@ -1,54 +1,57 @@
 {% extends "base.html" %}
-{% block title %}Login de Artista – MyMusicApp{% endblock %}
+{% block title %}Minhas Playlists – MyMusicApp{% endblock %}
+
 {% block content %}
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <title>Minhas Playlists</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
+<div class="container mx-auto py-8 max-w-3xl">
+  <a href="{{ url_for('user_dashboard', name=user) }}" class="text-blue-500 hover:underline mb-6 inline-block">
+    ← Voltar
+  </a>
 
+  <h1 class="text-2xl font-bold mb-4">Minhas Playlists</h1>
 
-<body>
-    
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            <ul class="flashes">
-                {% for message in messages %}
-                    <li>{{ message }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-    {% endwith %}
-
-    <h1>Minhas Playlists</h1>
-
-    <form method="POST" action="{{ url_for('create_playlist') }}">
-        <input type="hidden" name="user" value="{{ user }}">
-        <label for="name">Nome da nova playlist:</label>
-        <input type="text" name="name" required>
-        <button type="submit">Criar</button>
-    </form>
-
-    <ul>
-        {% for playlist in playlists %}
-            <li>
-                <a href="{{ url_for('view_playlist', playlist_id=playlist['id']) }}">{{ playlist['name'] }}</a>
-
-                <form action="{{ url_for('delete_playlist', playlist_id=playlist['id']) }}" method="POST" style="display: inline;">
-                    <input type="hidden" name="user" value="{{ user }}">
-                    <button type="submit" onclick="return confirm('Tem certeza que deseja excluir esta playlist?')">Excluir</button>
-                </form>
-            </li>
-        {% else %}
-            <li>Você ainda não criou playlists.</li>
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <ul class="mb-4 p-4 bg-yellow-100 border border-yellow-300 rounded">
+        {% for message in messages %}
+          <li class="text-yellow-800">{{ message }}</li>
         {% endfor %}
+      </ul>
+    {% endif %}
+  {% endwith %}
+
+  <form method="POST" action="{{ url_for('create_playlist') }}" class="mb-6">
+    <input type="hidden" name="user" value="{{ user }}">
+    <label for="name" class="block mb-2 font-medium">Nome da nova playlist:</label>
+    <input type="text" name="name" required class="w-full p-2 border rounded mb-2">
+    <button type="submit"
+            class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+      Criar
+    </button>
+  </form>
+
+  {% if playlists %}
+    <ul class="space-y-4">
+      {% for playlist in playlists %}
+        <li class="p-4 border rounded-lg shadow-sm flex justify-between items-center">
+          <a href="{{ url_for('view_playlist', playlist_id=playlist['id']) }}"
+             class="text-lg font-medium text-blue-600 hover:underline">
+            {{ playlist['name'] }}
+          </a>
+
+          <form action="{{ url_for('delete_playlist', playlist_id=playlist['id']) }}"
+                method="POST"
+                onsubmit="return confirm('Tem certeza que deseja excluir esta playlist?')">
+            <input type="hidden" name="user" value="{{ user }}">
+            <button type="submit"
+                    class="ml-4 px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">
+              Excluir
+            </button>
+          </form>
+        </li>
+      {% endfor %}
     </ul>
-
-    <a href="{{ url_for('user_dashboard', name=user) }}">Voltar ao painel</a>
-
-
-</body>
+  {% else %}
+    <p class="text-gray-600">Você ainda não criou playlists.</p>
+  {% endif %}
+</div>
 {% endblock %}
-

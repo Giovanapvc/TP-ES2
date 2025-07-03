@@ -9,6 +9,10 @@
        class="bg-white p-6 rounded-lg shadow hover:shadow-lg">
       <h3 class="font-semibold text-indigo-600">Minhas Curtidas</h3>
     </a>
+    <a href="{{ url_for('user_playlists') }}?user={{ user }}"
+        class="bg-white p-6 rounded-lg shadow hover:shadow-lg">
+      <h3 class="font-semibold text-indigo-600">Minhas Playlists</h3>
+    </a>
    <a href="{{ url_for('most_liked') }}?user={{ user }}"
        class="bg-white p-6 rounded-lg shadow hover:shadow-lg">
       <h3 class="font-semibold text-indigo-600">Mais Curtidas</h3>

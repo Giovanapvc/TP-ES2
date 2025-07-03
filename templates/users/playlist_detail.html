@@ -1,59 +1,50 @@
 {% extends "base.html" %}
-{% block title %}Login de Artista – MyMusicApp{% endblock %}
+{% block title %}Playlist: {{ playlist.name }} – MyMusicApp{% endblock %}
+
 {% block content %}
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-  <title>Playlist: {{ playlist.name }}</title>
-</head>
-<body>
+<div class="container mx-auto py-8 max-w-3xl">
+  <a href="{{ url_for('user_playlists', user=user) }}" class="text-blue-500 hover:underline mb-6 inline-block">
+    ← Voltar às minhas playlists
+  </a>
 
-  {# feedback de ações (Adicionar / Remover) #}
-  {% with messages = get_flashed_messages() %}
-    {% if messages %}
-      <ul class="flashes">
-        {% for m in messages %}
-          <li>{{ m }}</li>
-        {% endfor %}
-      </ul>
-    {% endif %}
-  {% endwith %}
+  <h1 class="text-2xl font-bold mb-4">Playlist: {{ playlist.name }}</h1>
 
-  <h1>Playlist: {{ playlist.name }}</h1>
+  <div class="mb-6 space-x-4">
+    <a href="{{ url_for('user_liked_for_playlist', user=user, playlist_id=playlist.id) }}"
+       class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+      Adicionar músicas curtidas
+    </a>
+    <a href="{{ url_for('search_by_name') }}"
+        class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 inline-block">
+      Buscar por nome
+    </a>
 
-  <h2>Músicas na playlist</h2>
+  </div>
+
+  <h2 class="text-xl font-semibold mb-3">Músicas na playlist</h2>
+
   {% if songs %}
-    <ul>
+    <ul class="space-y-4">
       {% for s in songs %}
-        <li>
-          {{ s.title }} — {{ s.artist_name }}
-          {% if s.link %}
-            | <a href="{{ s.link }}" target="_blank">Ouvir</a>
-          {% endif %}
-          <form action="{{ url_for('remove_song_from_playlist',
-                                   playlist_id=playlist.id,
-                                   song_id=s.id) }}"
-                method="post" style="display:inline;">
-            <button type="submit">Remover</button>
+        <li class="p-4 border rounded-lg shadow-sm flex justify-between items-center">
+          <div>
+            <p class="text-lg font-medium">{{ s.title }} <span class="text-gray-500">— {{ s.artist_name }}</span></p>
+            {% if s.link %}
+              <a href="{{ s.link }}" target="_blank" class="text-blue-500 hover:underline text-sm">Ouvir</a>
+            {% endif %}
+          </div>
+          <form action="{{ url_for('remove_song_from_playlist', playlist_id=playlist.id, song_id=s.id) }}"
+                method="post">
+            <button type="submit"
+                    class="ml-4 px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">
+              Remover
+            </button>
           </form>
         </li>
       {% endfor %}
     </ul>
   {% else %}
-    <p>Nenhuma música ainda.</p>
+    <p class="text-gray-600">Nenhuma música ainda.</p>
   {% endif %}
-
-  <hr>
-
-  <a href="{{ url_for('user_playlists', user=user) }}">
-    ← Voltar às minhas playlists
-  </a>
-
-</body>
-</html>
+</div>
 {% endblock %}
-
-

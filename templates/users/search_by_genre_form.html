@@ -1,59 +1,57 @@
 {% extends "base.html" %}
-{% block title %}Título da Página – MyMusicApp{% endblock %}
+{% block title %}Buscar por Gênero – MyMusicApp{% endblock %}
+
 {% block content %}
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <title>Buscar por Gênero</title>
-    <script>
-        function validate_form() {
-            const checkboxes = document.querySelectorAll('input[name="genre"]:checked');
-            if (checkboxes.length === 0) {
-                alert("Por favor, selecione pelo menos uma opção");
-                return false;
-            }
-            return true;
-        }
-    </script>
-</head>
+<div class="container mx-auto py-8 max-w-2xl">
+  <a href="{{ url_for('user_dashboard', name=user) }}" class="text-blue-500 hover:underline mb-6 inline-block">
+    ← Voltar
+  </a>
 
-<body>
+  <h1 class="text-2xl font-bold mb-6">Buscar por Gênero</h1>
 
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            <ul class="flashes">
-                {% for message in messages %}
-                    <li>{{ message }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-    {% endwith %}
-
-    <h1>Buscar por Gênero</h1>
-    <form action="{{ url_for('search_by_genre') }}" method="post" onsubmit="return validate_form();">
-        <input type="hidden" name="user" value="{{ user }}">
-        <p>Escolha uma ou mais opções:</p>
-
-        {% set all_genres = [
-            'rock', 'pop', 'jazz', 'hip-hop', 'blues',
-            'metal', 'electronic', 'classical', 'folk', 'other'
-        ] %}
-
-        {% for genre in all_genres %}
-            <label>
-                <input type="checkbox" name="genre" value="{{ genre }}">
-                {{ genre.capitalize() }}
-            </label><br>
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <ul class="mb-4 p-4 bg-yellow-100 border border-yellow-300 rounded">
+        {% for message in messages %}
+          <li class="text-yellow-800">{{ message }}</li>
         {% endfor %}
+      </ul>
+    {% endif %}
+  {% endwith %}
 
-        <br>
-        <button type="submit">Buscar</button>
-    </form>
+  <form action="{{ url_for('search_by_genre') }}" method="post" onsubmit="return validate_form();" class="space-y-4">
+    <input type="hidden" name="user" value="{{ user }}">
 
-    <a href="{{ url_for('user_dashboard', name=user) }}">Voltar ao painel</a>
+    <p class="font-medium">Escolha uma ou mais opções:</p>
 
-</body>
+    <div class="grid grid-cols-2 gap-2">
+      {% set all_genres = [
+          'rock', 'pop', 'jazz', 'hip-hop', 'blues',
+          'metal', 'electronic', 'classical', 'folk', 'other'
+      ] %}
+      {% for genre in all_genres %}
+        <label class="flex items-center space-x-2">
+          <input type="checkbox" name="genre" value="{{ genre }}" class="form-checkbox">
+          <span>{{ genre.capitalize() }}</span>
+        </label>
+      {% endfor %}
+    </div>
+
+    <button type="submit"
+            class="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+      Buscar
+    </button>
+  </form>
+</div>
+
+<script>
+  function validate_form() {
+    const checkboxes = document.querySelectorAll('input[name="genre"]:checked');
+    if (checkboxes.length === 0) {
+      alert("Por favor, selecione pelo menos uma opção");
+      return false;
+    }
+    return true;
+  }
+</script>
 {% endblock %}
-
-
